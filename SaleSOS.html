@@ -1,0 +1,2081 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>SalesOS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f5f2ed;--surface:#fff;--border:#e8e3db;--border2:#f0ece6;
+  --ink:#1a1a1a;--ink2:#444;--muted:#666;--faint:#888;--faintest:#999;
+  --accent:#f97316;--accent-bg:#fff7ed;--accent-border:#f9731635;
+  --dark:#0f0f0f;--dark2:#111;--dark3:#1a1a1a;--dark4:#222;
+  --hot-bg:#f9731612;--hot-c:#ea580c;--hot-b:#f9731635;
+  --warm-bg:#facc1512;--warm-c:#b45309;--warm-b:#facc1535;
+  --cold-bg:#60a5fa12;--cold-c:#2563eb;--cold-b:#60a5fa35;
+  --green:#4ade80;--red:#ef4444;--blue:#60a5fa;--purple:#a78bfa;
+}
+html,body{height:100%;overflow:hidden;font-family:'IBM Plex Mono',monospace;background:var(--bg);color:var(--ink)}
+::-webkit-scrollbar{width:4px;height:4px}::-webkit-scrollbar-thumb{background:#d0ccc6;border-radius:2px}
+@keyframes blink{0%,100%{opacity:.2}50%{opacity:1}}
+@keyframes up{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+@keyframes slidein{from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:translateX(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+
+/* LOGIN */
+#login{position:fixed;inset:0;background:var(--dark);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:1000;animation:fadeIn .3s ease}
+.login-logo{font-size:32px;font-weight:700;color:#f5f2ed;letter-spacing:-1px;margin-bottom:6px}
+.login-logo span{color:var(--accent)}
+.login-sub{font-size:10px;color:#333;letter-spacing:.2em;margin-bottom:48px}
+.login-label{font-size:10px;color:#333;letter-spacing:.14em;text-align:center;margin-bottom:16px}
+.rep-card{display:flex;align-items:center;gap:16px;padding:14px 18px;background:#111;border:2px solid #1e1e1e;cursor:pointer;transition:all .15s;width:340px;margin-bottom:8px;animation:up .3s ease both}
+.rep-card:hover{background:#1a1a1a;border-color:var(--accent)}
+.rep-avatar{width:38px;height:38px;background:#1e1e1e;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#444;transition:all .15s;flex-shrink:0}
+.rep-card:hover .rep-avatar{background:var(--accent);color:#fff}
+.rep-name{font-size:13px;font-weight:700;color:#f5f2ed}
+.rep-role{font-size:10px;color:#444;margin-top:2px}
+.rep-arrow{font-size:18px;color:#222;margin-left:auto;transition:color .15s}
+.rep-card:hover .rep-arrow{color:var(--accent)}
+.login-footer{font-size:10px;color:#252525;margin-top:40px;letter-spacing:.08em}
+
+/* AUTH SCREEN */
+#auth-screen{position:fixed;inset:0;background:var(--dark);display:none;flex-direction:column;align-items:center;justify-content:center;z-index:999;animation:fadeIn .3s ease}
+#auth-screen.visible{display:flex}
+.auth-back{position:absolute;top:20px;left:24px;background:transparent;border:1px solid #222;color:#444;cursor:pointer;font-size:10px;padding:6px 12px;font-family:'IBM Plex Mono';letter-spacing:.06em;transition:all .15s}
+.auth-back:hover{border-color:#555;color:#aaa}
+.auth-box{width:340px;animation:up .3s ease .1s both}
+.auth-who{display:flex;align-items:center;gap:12px;padding:16px 18px;background:#111;border:2px solid #1e1e1e;margin-bottom:22px}
+.auth-who-avatar{width:38px;height:38px;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0}
+.auth-who-name{font-size:13px;font-weight:700;color:#f5f2ed}
+.auth-who-role{font-size:10px;color:#444;margin-top:2px}
+.auth-field{margin-bottom:14px}
+.auth-label{font-size:9px;color:#333;letter-spacing:.14em;margin-bottom:7px}
+.auth-input{width:100%;background:#111;border:2px solid #1e1e1e;padding:12px 14px;font-size:13px;font-family:'IBM Plex Mono';color:#f5f2ed;letter-spacing:.04em;transition:border-color .15s}
+.auth-input:focus{outline:none;border-color:var(--accent)}
+.auth-input::placeholder{color:#2a2a2a}
+.auth-submit{width:100%;background:var(--accent);border:none;color:#fff;padding:13px;cursor:pointer;font-size:12px;font-family:'IBM Plex Mono';font-weight:700;letter-spacing:.06em;margin-top:6px;transition:opacity .15s}
+.auth-submit:hover{opacity:.9}
+.auth-error{font-size:11px;color:var(--red);margin-top:10px;text-align:center;font-family:'IBM Plex Sans';min-height:18px;letter-spacing:.02em}
+.auth-hint{font-size:9px;color:#252525;text-align:center;margin-top:20px;letter-spacing:.08em}
+.admin-badge{display:inline-flex;align-items:center;gap:4px;font-size:9px;background:#1a1a1a;border:1px solid #f97316;color:var(--accent);padding:2px 8px;letter-spacing:.1em;font-weight:700}
+.admin-nav-badge{font-size:9px;background:var(--accent);color:#fff;padding:1px 6px;letter-spacing:.06em;font-weight:700;margin-left:4px}
+
+/* APP SHELL */
+#app{display:none;flex-direction:column;height:100vh;overflow:hidden}
+#app.visible{display:flex}
+
+/* TOPBAR */
+#topbar{background:var(--dark2);color:#f5f2ed;padding:0 24px;display:flex;align-items:stretch;height:52px;border-bottom:2px solid #000;flex-shrink:0}
+.topbar-brand{display:flex;align-items:center;gap:10px;padding-right:24px;border-right:1px solid #1e1e1e;margin-right:4px}
+.brand-name{font-weight:700;font-size:16px;letter-spacing:-.5px}
+.brand-name span{color:var(--accent)}
+.brand-tag{font-size:9px;color:#888;background:#1a1a1a;padding:2px 7px;letter-spacing:.12em}
+.nav-btn{background:transparent;border:none;color:#888;padding:0 16px;cursor:pointer;font-size:11px;font-family:'IBM Plex Mono';font-weight:400;display:flex;align-items:center;gap:6px;transition:color .15s;letter-spacing:.02em;white-space:nowrap}
+.nav-btn:hover{color:#fff}
+.nav-btn.active{background:var(--accent);color:#fff;font-weight:700}
+.nav-badge{background:var(--accent);color:#fff;font-size:9px;padding:1px 5px;border-radius:9px;font-weight:700}
+.nav-btn.active .nav-badge{background:rgba(255,255,255,.25)}
+.topbar-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+.topbar-btn{background:transparent;border:1px solid #333;color:#888;padding:5px 13px;cursor:pointer;font-size:11px;font-family:'IBM Plex Mono';font-weight:600;letter-spacing:.04em;transition:all .15s}
+.topbar-btn:hover{border-color:#666;color:#ccc}
+.topbar-btn.accent{border-color:var(--accent);color:var(--accent)}
+.topbar-btn.accent.synced{background:#1a3a1a;border-color:var(--green);color:var(--green)}
+.topbar-btn.primary{background:var(--accent);border:none;color:#fff;font-weight:700}
+.topbar-divider{width:1px;height:26px;background:#1e1e1e}
+.current-rep{display:flex;align-items:center;gap:9px}
+.cur-avatar{width:30px;height:30px;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0}
+.cur-name{font-size:11px;font-weight:700;color:#f5f2ed;line-height:1.2}
+.cur-role{font-size:9px;color:#777;line-height:1.2}
+.switch-btn{background:transparent;border:1px solid #333;color:#777;cursor:pointer;font-size:10px;padding:3px 8px;font-family:'IBM Plex Mono'}
+
+/* STAT STRIP */
+#statstrip{background:#0d0d0d;border-bottom:2px solid #000;display:flex;flex-shrink:0}
+.stat-cell{flex:1;padding:11px 22px;border-right:1px solid #141414;cursor:pointer;transition:background .15s}
+.stat-cell:last-child{border-right:none}
+.stat-cell:hover{background:#1a1a1a}
+.stat-label{font-size:9px;color:#888;letter-spacing:.13em;margin-bottom:3px}
+.stat-value{font-size:22px;font-weight:700;font-family:'IBM Plex Mono';letter-spacing:-.5px}
+
+/* BANNER */
+#hs-banner{background:var(--accent-bg);border-bottom:1px solid var(--accent);padding:8px 24px;display:none;align-items:center;gap:10px;flex-shrink:0}
+#hs-banner.visible{display:flex}
+.banner-text{font-size:11px;color:#92400e;font-family:'IBM Plex Sans';flex:1}
+.banner-close{cursor:pointer;color:var(--accent);font-size:13px;font-weight:700}
+
+/* BODY */
+#body{display:flex;flex:1;overflow:hidden}
+
+/* DETAIL PANEL */
+#detail{width:340px;background:var(--surface);border-right:2px solid var(--border);display:none;flex-direction:column;animation:slidein .2s ease;flex-shrink:0}
+#detail.visible{display:flex}
+.detail-header{padding:18px 18px 14px;border-bottom:1px solid var(--border2)}
+.detail-name{font-size:16px;font-weight:700;margin-bottom:3px;line-height:1.2}
+.detail-sub{font-size:11px;color:var(--muted);margin-bottom:8px}
+.detail-tags{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.hs-link{font-size:9px;color:var(--accent);border:1px solid var(--accent-border);padding:2px 7px;font-weight:700;text-decoration:none;background:var(--accent-bg)}
+.detail-close{background:none;border:none;cursor:pointer;color:var(--faintest);font-size:20px;line-height:1;padding:0;margin-left:auto;align-self:flex-start}
+.detail-fields{padding:14px 18px;border-bottom:1px solid var(--border2)}
+.field-row{display:flex;gap:10px;align-items:baseline;margin-bottom:7px}
+.field-label{font-size:9px;color:var(--faintest);width:86px;flex-shrink:0;letter-spacing:.08em}
+.field-value{font-size:11px;color:var(--ink);font-weight:500;word-break:break-all}
+.detail-actions{padding:12px 14px;display:flex;flex-direction:column;gap:7px}
+.action-btn{border:none;padding:10px;cursor:pointer;font-size:11px;font-family:'IBM Plex Mono';font-weight:600;letter-spacing:.04em}
+.action-btn.dark{background:var(--dark3);color:#f5f2ed}
+.action-btn.orange{background:var(--accent);color:#fff;font-weight:700}
+.detail-log-area{flex:1;overflow:auto;padding:0 14px 14px}
+.log-section-label{font-size:9px;color:var(--faintest);letter-spacing:.1em;padding:10px 0 7px}
+.log-entry{padding:9px 0;border-bottom:1px solid #f8f5f0}
+.log-entry-meta{display:flex;gap:6px;align-items:center;margin-bottom:3px}
+.log-entry-icon{font-size:14px}
+.log-entry-info{font-size:10px;color:var(--faintest)}
+.log-entry-note{font-size:11px;color:#555;line-height:1.6}
+
+/* MAIN CONTENT AREA */
+#main{flex:1;overflow:auto;display:flex;flex-direction:column}
+
+/* TABLES */
+.section-header{padding:14px 24px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;flex-shrink:0;flex-wrap:wrap}
+.section-title{font-size:12px;font-weight:700;letter-spacing:.02em}
+.section-sub{font-size:10px;color:var(--faintest)}
+.filter-tag{display:flex;align-items:center;gap:6px;padding:3px 10px;font-size:10px;font-family:'IBM Plex Mono';font-weight:700}
+.filter-tag.orange{background:var(--accent-bg);border:1px solid var(--accent);color:var(--accent)}
+.filter-tag.red{background:#fef2f2;border:1px solid var(--red);color:var(--red)}
+.filter-tag-close{cursor:pointer;margin-left:4px}
+.chip-group{display:flex;gap:6px;align-items:center}
+.chip{background:transparent;color:var(--muted);border:1px solid var(--border);padding:4px 11px;cursor:pointer;font-size:10px;font-family:'IBM Plex Mono';font-weight:600;transition:all .15s}
+.chip:hover,.chip.active{background:var(--dark3);color:#f5f2ed}
+.divider-v{width:1px;height:16px;background:var(--border)}
+
+table{width:100%;border-collapse:collapse}
+thead{position:sticky;top:0;z-index:2}
+th{padding:8px 14px;text-align:left;font-size:9px;color:var(--muted);letter-spacing:.1em;font-weight:600;white-space:nowrap;background:var(--bg)}
+thead tr{border-bottom:2px solid var(--border)}
+td{padding:11px 14px}
+tbody tr{border-bottom:1px solid var(--border2);cursor:pointer;transition:background .12s}
+tbody tr:hover{background:var(--bg)}
+
+.tag{font-size:10px;padding:2px 8px;font-weight:700}
+.tag.hot{background:var(--hot-bg);color:var(--hot-c);border:1px solid var(--hot-b)}
+.tag.warm{background:var(--warm-bg);color:var(--warm-c);border:1px solid var(--warm-b)}
+.tag.cold{background:var(--cold-bg);color:var(--cold-c);border:1px solid var(--cold-b)}
+.tag.small{font-size:9px;padding:1px 7px}
+
+.contact-name{font-size:12px;font-weight:600}
+.contact-sub{font-size:10px;color:var(--faintest)}
+.contact-email{font-size:10px;color:var(--faintest)}
+.money{font-size:12px;font-weight:700;font-family:'IBM Plex Mono'}
+.stage-cell{font-size:11px;color:#777}
+.owner-cell{font-size:11px}
+.touch-cell{font-size:11px;color:var(--faintest)}
+.date-pill{font-size:11px;font-weight:700;padding:2px 7px}
+.date-pill.overdue{color:var(--red);background:#fef2f2}
+.date-pill.today{color:var(--accent);background:var(--accent-bg)}
+.date-pill.normal{color:var(--faintest)}
+.dot-indicator{width:5px;height:5px;border-radius:50%;background:var(--accent);flex-shrink:0}
+.touch-dots{display:flex;gap:2px;align-items:center}
+.touch-dot{width:6px;height:6px;border-radius:50%;background:var(--accent)}
+.never-tag{font-size:10px;color:var(--red);font-weight:700}
+.row-actions{padding:10px}
+.row-btn{border:none;color:#fff;padding:4px 9px;cursor:pointer;font-size:10px;font-family:'IBM Plex Mono';font-weight:600;margin-right:4px}
+.row-btn.dark{background:var(--dark3)}
+.row-btn.orange{background:var(--accent);font-weight:700}
+.table-scroll{flex:1;overflow:auto}
+
+/* ACTIVITY TAB */
+.activity-wrap{padding:24px;flex:1;overflow:auto}
+.activity-list{background:var(--surface);border:1px solid var(--border)}
+.activity-item{display:flex;gap:14px;padding:13px 18px;border-bottom:1px solid #f5f2ed;cursor:pointer;transition:background .12s}
+.activity-item:last-child{border-bottom:none}
+.activity-item:hover{background:var(--bg)}
+.activity-item.mine{background:#fffaf8}
+.activity-icon-wrap{width:34px;height:34px;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.activity-content{flex:1}
+.activity-meta{display:flex;gap:8px;align-items:baseline;margin-bottom:3px}
+.activity-contact{font-size:12px;font-weight:700}
+.activity-company{font-size:10px;color:var(--faintest)}
+.activity-date{font-size:10px;margin-left:auto}
+.activity-note{font-size:11px;color:#666;line-height:1.6}
+.activity-type{font-size:10px;background:var(--bg);padding:2px 8px;color:var(--muted);font-weight:600;align-self:center}
+
+/* TEAM TAB */
+.team-wrap{padding:24px;flex:1;overflow:auto}
+.team-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+.rep-card-dash{background:var(--surface);padding:22px;position:relative;cursor:pointer;transition:transform .15s,box-shadow .15s;border:2px solid var(--border)}
+.rep-card-dash:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(0,0,0,.08)}
+.rep-card-dash.me{border-color:var(--accent)}
+.rep-you-badge{position:absolute;top:12px;right:12px;font-size:9px;background:var(--accent);color:#fff;padding:2px 8px;letter-spacing:.1em;font-weight:700}
+.rep-card-top{display:flex;align-items:center;gap:14px;margin-bottom:18px}
+.rep-dash-avatar{width:42px;height:42px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff}
+.rep-dash-name{font-size:15px;font-weight:700;margin-bottom:2px}
+.rep-dash-sub{font-size:10px;color:var(--faintest)}
+.rep-quota-pct{font-size:28px;font-weight:700;font-family:'IBM Plex Mono';letter-spacing:-1px;text-align:right}
+.rep-quota-sub{font-size:9px;color:var(--faintest);text-align:right}
+.rep-progress{height:6px;background:#f0ece6;overflow:hidden;margin-bottom:12px}
+.rep-progress-bar{height:100%;transition:width .5s ease}
+.rep-stats{display:flex;justify-content:space-between;font-size:10px;color:var(--faintest);font-family:'IBM Plex Mono'}
+
+/* AI TAB */
+.ai-wrap{padding:24px;flex:1;overflow:auto}
+.ai-inner{max-width:780px}
+.ai-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
+.ai-title{font-size:12px;font-weight:700;letter-spacing:.02em}
+.stream-toggle{display:flex;align-items:center;gap:8px}
+.stream-label{font-size:10px;font-family:'IBM Plex Mono'}
+.toggle-track{width:38px;height:20px;border-radius:10px;cursor:pointer;position:relative;transition:background .2s}
+.toggle-thumb{position:absolute;top:3px;width:14px;height:14px;border-radius:50%;background:#fff;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.ai-sub{font-size:11px;color:var(--faintest);font-family:'IBM Plex Sans';margin-bottom:20px}
+.quick-btns{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap}
+.quick-btn{background:var(--surface);border:1px solid var(--border);color:#555;padding:7px 12px;cursor:pointer;font-size:11px;text-align:left;font-family:'IBM Plex Sans';line-height:1.4;transition:all .15s}
+.quick-btn:hover{background:var(--bg);border-color:#bbb}
+.ai-input-row{display:flex;margin-bottom:20px}
+.ai-textarea{flex:1;background:var(--surface);border:2px solid var(--dark3);border-right:none;padding:13px 15px;font-size:12px;font-family:'IBM Plex Sans';resize:none;color:var(--ink)}
+.ai-textarea:focus{outline:2px solid var(--accent);outline-offset:-1px}
+.ai-send-btn{background:var(--accent);border:2px solid var(--dark3);color:#fff;padding:0 20px;cursor:pointer;font-size:11px;font-family:'IBM Plex Mono';font-weight:700;min-width:84px}
+.ai-send-btn:disabled{opacity:.7;cursor:not-allowed}
+.ai-response-box{background:var(--surface);border:2px solid var(--dark3);padding:22px 24px;animation:up .3s ease}
+.ai-response-header{display:flex;align-items:center;gap:12px;margin-bottom:18px;padding-bottom:14px;border-bottom:2px solid #f5f2ed}
+.ai-response-icon{width:32px;height:32px;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.ai-response-title{font-size:10px;font-weight:700;letter-spacing:.12em;color:var(--accent)}
+.ai-response-sub{font-size:9px;color:var(--faintest);letter-spacing:.05em;margin-top:1px}
+.ai-thinking{font-size:12px;color:var(--faintest);font-style:italic;font-family:'IBM Plex Sans'}
+.ai-rendered{font-family:'IBM Plex Sans',sans-serif;font-size:13px;color:var(--ink);line-height:1.8}
+.ai-step{display:flex;gap:12px;margin-bottom:8px;padding:10px 14px;background:#f9f7f4;border-left:3px solid var(--accent)}
+.ai-step-num{font-family:'IBM Plex Mono';font-weight:700;color:var(--accent);font-size:12px;flex-shrink:0}
+.ai-step-label{font-weight:700}
+.ai-step-body{color:#444}
+.ai-gut{margin-top:10px;padding:8px 12px;background:var(--accent-bg);border-left:3px solid var(--accent);font-size:12px;color:#92400e;font-style:italic}
+.ai-email-line{font-family:'IBM Plex Mono';font-size:11.5px;color:#222;margin:2px 0;line-height:1.7}
+.ai-first-line{font-weight:600;color:var(--ink);margin-bottom:14px;font-size:13.5px;line-height:1.6}
+.ai-para{color:#444;margin-bottom:5px}
+
+/* PROMPT EDITOR */
+.ai-prompt-editor{background:#f0ece5;border:1px solid var(--border);padding:18px;margin-bottom:20px;animation:up .2s ease}
+.prompt-editor-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.prompt-editor-title{font-size:11px;font-weight:700;letter-spacing:.06em;color:var(--ink2)}
+.prompt-editor-btns{display:flex;gap:8px}
+.prompt-btn{border:none;padding:5px 12px;cursor:pointer;font-size:10px;font-family:'IBM Plex Mono';font-weight:700;letter-spacing:.04em}
+.prompt-btn.save{background:var(--accent);color:#fff}
+.prompt-btn.reset{background:var(--dark3);color:#f5f2ed}
+.prompt-editor-sub{font-size:10px;color:var(--muted);font-family:'IBM Plex Sans';margin-bottom:10px;line-height:1.5}
+.prompt-textarea{width:100%;background:var(--surface);border:1px solid var(--border);padding:12px 14px;font-size:11px;font-family:'IBM Plex Mono';resize:vertical;color:var(--ink);min-height:180px;line-height:1.6}
+.prompt-textarea:focus{outline:2px solid var(--accent);outline-offset:-1px}
+.prompt-saved-toast{font-size:10px;color:var(--green);font-weight:700;letter-spacing:.06em;margin-left:10px;opacity:0;transition:opacity .3s}
+.prompt-saved-toast.visible{opacity:1}
+
+/* MODALS */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;z-index:300;animation:fadeIn .15s ease}
+.modal{background:var(--surface);border:2px solid var(--dark3);padding:26px;animation:up .2s ease}
+.modal-title{font-size:14px;font-weight:700;margin-bottom:18px}
+.modal-sub{font-size:11px;color:var(--faintest);font-family:'IBM Plex Sans';margin-bottom:18px}
+.type-btns{display:flex;gap:6px;margin-bottom:14px}
+.type-btn{border:1px solid var(--border);padding:7px 14px;cursor:pointer;font-size:11px;font-family:'IBM Plex Mono';font-weight:600}
+.log-textarea{width:100%;background:var(--bg);border:2px solid var(--dark3);padding:11px 13px;font-size:12px;font-family:'IBM Plex Sans';resize:none;color:var(--ink);margin-bottom:14px}
+.log-textarea:focus{outline:2px solid var(--accent);outline-offset:-1px}
+.modal-actions{display:flex;gap:8px}
+.modal-btn{flex:1;padding:11px;cursor:pointer;font-size:11px;font-family:'IBM Plex Mono';font-weight:600;border:none}
+.modal-btn.cancel{background:var(--bg);border:1px solid var(--border)}
+.modal-btn.primary{background:var(--dark3);color:#fff;font-weight:700;flex:2}
+.modal-btn.orange{background:var(--accent);color:#fff;font-weight:700;flex:2}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.form-grid.full{grid-column:1/3}
+.form-label{font-size:9px;color:var(--faintest);letter-spacing:.1em;margin-bottom:5px}
+.form-input,.form-select{width:100%;background:var(--bg);border:1px solid var(--border);padding:9px 11px;font-size:12px;font-family:'IBM Plex Mono';color:var(--ink)}
+.form-input:focus,.form-select:focus{outline:2px solid var(--accent);outline-offset:-1px}
+.import-drop{border:2px dashed var(--border);padding:36px 20px;text-align:center;cursor:pointer;transition:border-color .15s;margin-bottom:14px}
+.import-drop:hover{border-color:var(--accent)}
+.import-drop-icon{font-size:26px;margin-bottom:10px}
+.import-drop-title{font-size:13px;font-weight:600;margin-bottom:5px}
+.import-drop-sub{font-size:10px;color:var(--faintest)}
+.import-error{background:#fef2f2;border:1px solid rgba(239,68,68,.25);padding:11px 14px;font-size:11px;color:var(--red);margin-bottom:14px}
+.import-preview-label{font-size:10px;color:var(--faintest);letter-spacing:.1em;margin-bottom:8px}
+.import-preview-wrap{flex:1;overflow:auto;border:1px solid var(--border);margin-bottom:14px}
+.import-preview-more{padding:8px 11px;font-size:10px;color:var(--faintest);border-top:1px solid var(--border2)}
+.dots{display:inline-flex;gap:3px;align-items:center}
+.dot-ani{width:5px;height:5px;border-radius:50%;background:var(--accent);animation:blink 1s ease-in-out infinite}
+
+/* AI MODE BUTTONS */
+.ai-mode-btn{background:var(--surface);border:1px solid var(--border);color:var(--ink2);padding:7px 13px;cursor:pointer;font-size:11px;font-family:'IBM Plex Sans';font-weight:500;transition:all .15s;white-space:nowrap}
+.ai-mode-btn:hover{border-color:var(--accent);color:var(--accent)}
+.ai-mode-btn.active{background:var(--dark3);border-color:var(--dark3);color:#fff;font-weight:600}
+
+/* CONVERSATION HISTORY */
+.convo-turn{padding:14px 16px;border-bottom:1px solid var(--border2)}
+.convo-turn.user{background:var(--bg)}
+.convo-turn.assistant{background:var(--surface)}
+.convo-turn-label{font-size:9px;font-weight:700;letter-spacing:.1em;margin-bottom:6px}
+.convo-turn-label.user{color:var(--muted)}
+.convo-turn-label.assistant{color:var(--accent)}
+.convo-turn-text{font-size:11px;color:var(--ink2);font-family:'IBM Plex Sans';line-height:1.6}
+
+/* EMAIL CARD */
+.email-card{background:#fffef9;border:1px solid #e8e3c8;margin:4px 0 8px}
+.email-card-header{background:#f5f0d8;padding:8px 14px;border-bottom:1px solid #e8e3c8;display:flex;justify-content:space-between;align-items:center}
+.email-card-subject{font-size:11px;font-weight:700;color:var(--ink);font-family:'IBM Plex Mono'}
+.email-card-copy{background:var(--dark3);border:none;color:#fff;padding:3px 10px;cursor:pointer;font-size:9px;font-family:'IBM Plex Mono';font-weight:700;letter-spacing:.04em}
+.email-card-copy:hover{background:var(--accent)}
+.email-card-body{padding:12px 14px;font-size:12px;font-family:'IBM Plex Mono';color:var(--ink);line-height:1.8;white-space:pre-wrap}
+
+/* MEDDICC SCORECARD */
+.meddicc-card{border:1px solid var(--border);margin:8px 0}
+.meddicc-row{display:flex;align-items:flex-start;gap:12px;padding:10px 14px;border-bottom:1px solid var(--border2)}
+.meddicc-row:last-child{border-bottom:none}
+.meddicc-letter{width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0}
+.meddicc-label{font-size:10px;font-weight:700;letter-spacing:.06em;margin-bottom:2px}
+.meddicc-status{font-size:11px;font-family:'IBM Plex Sans';color:var(--ink2);line-height:1.5}
+
+/* ACTION ITEMS */
+.action-card{background:#f9f7f4;border-left:3px solid var(--accent);padding:10px 14px;margin:4px 0;display:flex;gap:10px;align-items:flex-start}
+.action-num{font-family:'IBM Plex Mono';font-weight:700;color:var(--accent);font-size:11px;flex-shrink:0;margin-top:1px}
+.action-content{font-size:12px;font-family:'IBM Plex Sans';color:var(--ink2);line-height:1.6;flex:1}
+.action-copy-btn{background:none;border:none;cursor:pointer;font-size:11px;color:var(--muted);padding:0;flex-shrink:0;margin-top:1px}
+.action-copy-btn:hover{color:var(--accent)}
+
+/* INSIGHT BLOCK */
+.insight-block{background:var(--accent-bg);border:1px solid var(--accent-border);padding:12px 14px;margin:8px 0}
+.insight-label{font-size:9px;font-weight:700;letter-spacing:.1em;color:var(--accent);margin-bottom:6px}
+.insight-text{font-size:12px;font-family:'IBM Plex Sans';color:#92400e;line-height:1.6}
+
+/* COPY TOAST */
+.copy-toast{position:fixed;bottom:24px;right:24px;background:var(--dark3);color:#fff;padding:8px 16px;font-size:11px;font-family:'IBM Plex Mono';font-weight:700;z-index:999;opacity:0;transition:opacity .2s;pointer-events:none}
+.copy-toast.visible{opacity:1}
+.settings-wrap{padding:24px;flex:1;overflow:auto}
+.settings-inner{max-width:640px}
+.settings-section{background:var(--surface);border:1px solid var(--border);padding:22px;margin-bottom:16px}
+.settings-section-title{font-size:11px;font-weight:700;letter-spacing:.08em;margin-bottom:4px;color:var(--ink)}
+.settings-section-sub{font-size:11px;color:var(--muted);font-family:'IBM Plex Sans';margin-bottom:18px;line-height:1.5}
+.settings-field{margin-bottom:14px}
+.settings-label{font-size:9px;color:var(--faintest);letter-spacing:.1em;margin-bottom:6px}
+.settings-input,.settings-textarea,.settings-select{width:100%;background:var(--bg);border:1px solid var(--border);padding:10px 12px;font-size:12px;font-family:'IBM Plex Mono';color:var(--ink)}
+.settings-textarea{resize:vertical;line-height:1.6;min-height:100px}
+.settings-input:focus,.settings-textarea:focus,.settings-select:focus{outline:2px solid var(--accent);outline-offset:-1px}
+.settings-save-btn{background:var(--accent);border:none;color:#fff;padding:10px 22px;cursor:pointer;font-size:11px;font-family:'IBM Plex Mono';font-weight:700;letter-spacing:.04em}
+.settings-row{display:flex;gap:10px;align-items:flex-end}
+.settings-row .settings-field{flex:1}
+.tag-list{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.tag-item{display:flex;align-items:center;gap:6px;background:var(--bg);border:1px solid var(--border);padding:4px 10px;font-size:11px}
+.tag-remove{cursor:pointer;color:var(--muted);font-weight:700;font-size:13px;line-height:1}
+.tag-remove:hover{color:var(--red)}
+.tag-add-row{display:flex;gap:8px;margin-top:8px}
+.tag-add-input{flex:1;background:var(--bg);border:1px solid var(--border);padding:7px 10px;font-size:11px;font-family:'IBM Plex Mono';color:var(--ink)}
+.tag-add-btn{background:var(--dark3);border:none;color:#fff;padding:7px 14px;cursor:pointer;font-size:11px;font-family:'IBM Plex Mono';font-weight:600}
+.settings-saved{font-size:10px;color:var(--green);font-weight:700;letter-spacing:.06em;opacity:0;transition:opacity .3s;margin-left:12px}
+.settings-saved.visible{opacity:1}
+
+/* CREDENTIALS */
+.cred-row{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:8px;align-items:center;padding:10px 0;border-bottom:1px solid var(--border2)}
+.cred-row:last-child{border-bottom:none}
+.cred-rep-label{font-size:11px;font-weight:700;display:flex;align-items:center;gap:6px}
+.cred-admin-star{font-size:9px;color:var(--accent);letter-spacing:.06em;font-weight:700}
+.cred-input{background:var(--bg);border:1px solid var(--border);padding:7px 10px;font-size:11px;font-family:'IBM Plex Mono';color:var(--ink);width:100%}
+.cred-input:focus{outline:2px solid var(--accent);outline-offset:-1px}
+.cred-save-btn{background:var(--dark3);border:none;color:#fff;padding:7px 12px;cursor:pointer;font-size:10px;font-family:'IBM Plex Mono';font-weight:700;white-space:nowrap;letter-spacing:.04em}
+.cred-save-btn:hover{background:var(--accent)}
+.cred-saved{font-size:9px;color:var(--green);font-weight:700;opacity:0;transition:opacity .3s;white-space:nowrap}
+.cred-saved.visible{opacity:1}
+.cred-header{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:8px;padding-bottom:8px;border-bottom:2px solid var(--border);margin-bottom:4px}
+.cred-header-label{font-size:9px;color:var(--muted);letter-spacing:.1em;font-weight:600}
+</style>
+</head>
+<body>
+
+<!-- LOGIN — SELECT REP -->
+<div id="login">
+  <div class="login-logo">SALES<span>OS</span></div>
+  <div class="login-sub" id="login-brand-tag">LOADING...</div>
+  <div class="login-label">SELECT YOUR PROFILE</div>
+  <div id="rep-list"></div>
+  <div class="login-footer">Session data persists until you close the tab</div>
+</div>
+
+<!-- AUTH — USERNAME + PASSWORD -->
+<div id="auth-screen">
+  <button class="auth-back" onclick="backToLogin()">← BACK</button>
+  <div class="auth-box">
+    <div class="login-logo" style="text-align:center;margin-bottom:6px">SALES<span style="color:var(--accent)">OS</span></div>
+    <div style="font-size:10px;color:#333;letter-spacing:.2em;text-align:center;margin-bottom:28px" id="auth-brand-sub"></div>
+    <div class="auth-who">
+      <div class="auth-who-avatar" id="auth-avatar"></div>
+      <div>
+        <div class="auth-who-name" id="auth-name"></div>
+        <div class="auth-who-role" id="auth-role"></div>
+      </div>
+    </div>
+    <div class="auth-field">
+      <div class="auth-label">USERNAME</div>
+      <input class="auth-input" id="auth-username" type="text" placeholder="username" autocomplete="username" onkeydown="if(event.key==='Enter')id('auth-password').focus()"/>
+    </div>
+    <div class="auth-field">
+      <div class="auth-label">PASSWORD</div>
+      <input class="auth-input" id="auth-password" type="password" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')submitAuth()"/>
+    </div>
+    <button class="auth-submit" onclick="submitAuth()">SIGN IN →</button>
+    <div class="auth-error" id="auth-error"></div>
+    <div style="text-align:center;margin-top:14px">
+      <span onclick="openResetModal()" style="font-size:10px;color:#444;letter-spacing:.08em;cursor:pointer;text-decoration:underline;text-underline-offset:3px;font-family:'IBM Plex Mono'">Forgot your password?</span>
+    </div>
+  </div>
+</div>
+
+<!-- RESET PASSWORD MODAL -->
+<div id="reset-modal" style="position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;z-index:1100;animation:fadeIn .15s ease" onclick="closeResetModal()">
+  <div style="background:#111;border:2px solid #1e1e1e;width:380px;padding:28px;animation:up .2s ease" onclick="event.stopPropagation()">
+    <div style="font-size:14px;font-weight:700;color:#f5f2ed;margin-bottom:6px">RESET PASSWORD</div>
+    <div style="font-size:11px;color:#444;font-family:'IBM Plex Sans';margin-bottom:22px;line-height:1.5">Enter the admin reset code, then set a new password for <span id="reset-repname" style="color:var(--accent);font-weight:700"></span>.</div>
+    <div style="margin-bottom:12px">
+      <div class="auth-label">ADMIN RESET CODE</div>
+      <input class="auth-input" id="reset-code" type="password" placeholder="Enter reset code" autocomplete="off" onkeydown="if(event.key==='Enter')id('reset-newpass').focus()"/>
+    </div>
+    <div style="margin-bottom:12px">
+      <div class="auth-label">NEW PASSWORD</div>
+      <input class="auth-input" id="reset-newpass" type="password" placeholder="New password" autocomplete="new-password" onkeydown="if(event.key==='Enter')id('reset-confirm').focus()"/>
+    </div>
+    <div style="margin-bottom:18px">
+      <div class="auth-label">CONFIRM PASSWORD</div>
+      <input class="auth-input" id="reset-confirm" type="password" placeholder="Confirm new password" autocomplete="new-password" onkeydown="if(event.key==='Enter')submitReset()"/>
+    </div>
+    <button class="auth-submit" onclick="submitReset()">RESET PASSWORD →</button>
+    <div class="auth-error" id="reset-error"></div>
+    <div style="text-align:center;margin-top:14px">
+      <span onclick="closeResetModal()" style="font-size:10px;color:#333;cursor:pointer;font-family:'IBM Plex Mono';letter-spacing:.06em">CANCEL</span>
+    </div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <!-- TOPBAR -->
+  <div id="topbar">
+    <div class="topbar-brand">
+      <img id="topbar-logo" src="" alt="" style="height:28px;max-width:90px;object-fit:contain;display:none;margin-right:2px"/>
+      <span class="brand-name" id="topbar-brand-name">SALES<span>OS</span></span>
+      <span class="brand-tag" id="topbar-brand-tag"></span>
+    </div>
+    <button class="nav-btn active" data-tab="follow" onclick="switchTab('follow',this)">Follow-ups <span class="nav-badge" id="overdue-badge" style="display:none"></span></button>
+    <button class="nav-btn" data-tab="contacts" onclick="switchTab('contacts',this)">Contacts</button>
+    <button class="nav-btn" data-tab="log" onclick="switchTab('log',this)">Activity</button>
+    <button class="nav-btn" data-tab="team" onclick="switchTab('team',this)">Team</button>
+    <button class="nav-btn" data-tab="ai" onclick="switchTab('ai',this)">AI Coach</button>
+    <button class="nav-btn" data-tab="settings" id="settings-nav-btn" onclick="switchTab('settings',this)" style="display:none">⚙ Settings <span class="admin-nav-badge">ADMIN</span></button>
+    <button class="nav-btn" onclick="logout()" style="margin-left:auto;color:#555;border-left:1px solid #1e1e1e;padding:0 18px">⏻ Log Out</button>
+    <div class="topbar-right" style="margin-left:0">
+      <button class="topbar-btn" onclick="openImport()">⬆ IMPORT</button>
+      <button class="topbar-btn accent" id="hs-sync-btn" onclick="syncHubSpot()">⟳ SYNC HUBSPOT</button>
+      <button class="topbar-btn primary" onclick="openAddContact()">+ NEW CONTACT</button>
+      <div class="topbar-divider"></div>
+      <div class="current-rep">
+        <div class="cur-avatar" id="cur-avatar"></div>
+        <div>
+          <div class="cur-name" id="cur-name"></div>
+          <div class="cur-role" id="cur-role"></div>
+        </div>
+        <span class="admin-badge" id="admin-badge" style="display:none">★ ADMIN</span>
+        <button class="switch-btn" onclick="logout()" title="Switch user">⇄</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- STAT STRIP -->
+  <div id="statstrip">
+    <div class="stat-cell" onclick="switchTab('follow');setUrgencyFilter('overdue')">
+      <div class="stat-label">OVERDUE</div>
+      <div class="stat-value" id="s-overdue" style="color:var(--red)">0</div>
+    </div>
+    <div class="stat-cell" onclick="switchTab('follow');setUrgencyFilter('today')">
+      <div class="stat-label">DUE TODAY</div>
+      <div class="stat-value" id="s-today" style="color:var(--accent)">0</div>
+    </div>
+    <div class="stat-cell" onclick="switchTab('contacts');setRepFilter(currentRep.name)">
+      <div class="stat-label">MY CONTACTS</div>
+      <div class="stat-value" id="s-mine" style="color:var(--blue)">0</div>
+    </div>
+    <div class="stat-cell" onclick="switchTab('contacts')">
+      <div class="stat-label">OPEN PIPE</div>
+      <div class="stat-value" id="s-pipe" style="color:var(--green)">$0</div>
+    </div>
+    <div class="stat-cell" onclick="switchTab('log')">
+      <div class="stat-label">AVG TOUCHES</div>
+      <div class="stat-value" id="s-touches" style="color:var(--purple)">0</div>
+    </div>
+  </div>
+
+  <!-- BANNER -->
+  <div id="hs-banner">
+    <span class="banner-text" id="hs-banner-text"></span>
+    <span class="banner-close" onclick="document.getElementById('hs-banner').classList.remove('visible')">✕</span>
+  </div>
+
+  <!-- BODY -->
+  <div id="body">
+    <!-- DETAIL PANEL -->
+    <div id="detail">
+      <div class="detail-header">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start">
+          <div>
+            <div class="detail-name" id="d-name"></div>
+            <div class="detail-sub" id="d-sub"></div>
+            <div class="detail-tags" id="d-tags"></div>
+          </div>
+          <button class="detail-close" onclick="closeDetail()">×</button>
+        </div>
+      </div>
+      <div class="detail-fields" id="d-fields"></div>
+      <div class="detail-actions">
+        <button class="action-btn dark" onclick="openLogForSelected()">+ LOG ACTIVITY</button>
+        <button class="action-btn orange" onclick="aiCoachForSelected()">⚡ ASK AI COACH</button>
+      </div>
+      <div class="detail-log-area">
+        <div class="log-section-label">ACTIVITY LOG</div>
+        <div id="d-log-entries"></div>
+      </div>
+    </div>
+
+    <!-- MAIN -->
+    <div id="main">
+
+      <!-- FOLLOW-UPS TAB -->
+      <div id="tab-follow" class="tab-content" style="display:flex;flex-direction:column;flex:1;overflow:hidden;animation:up .2s ease">
+        <div class="section-header">
+          <span class="section-title">FOLLOW-UP QUEUE</span>
+          <span class="section-sub">— sorted by urgency</span>
+          <div style="margin-left:auto;display:flex;gap:6px;align-items:center" id="follow-filter-tags"></div>
+        </div>
+        <div class="table-scroll">
+          <table>
+            <thead><tr>
+              <th>CONTACT</th><th>COMPANY</th><th>VALUE</th><th>STATUS</th><th>STAGE</th>
+              <th>OWNER</th><th>LAST TOUCH</th><th>NEXT FOLLOW</th><th>TOUCHES</th><th></th>
+            </tr></thead>
+            <tbody id="follow-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- CONTACTS TAB -->
+      <div id="tab-contacts" class="tab-content" style="display:none;flex-direction:column;flex:1;overflow:hidden;animation:up .2s ease">
+        <div class="section-header">
+          <span class="section-title">ALL CONTACTS</span>
+          <span class="section-sub" id="contacts-count"></span>
+          <div style="margin-left:auto;display:flex;gap:6px;align-items:center;flex-wrap:wrap" id="contacts-filters">
+            <div id="rep-filter-tag" style="display:none" class="filter-tag orange"></div>
+            <div class="divider-v"></div>
+            <div class="chip-group">
+              <button class="chip active" data-status="all" onclick="setStatusFilter('all',this)">ALL</button>
+              <button class="chip" data-status="hot" onclick="setStatusFilter('hot',this)">HOT</button>
+              <button class="chip" data-status="warm" onclick="setStatusFilter('warm',this)">WARM</button>
+              <button class="chip" data-status="cold" onclick="setStatusFilter('cold',this)">COLD</button>
+            </div>
+          </div>
+        </div>
+        <div class="table-scroll">
+          <table>
+            <thead><tr>
+              <th>CONTACT</th><th>COMPANY</th><th>VALUE</th><th>STATUS</th><th>STAGE</th><th>OWNER</th><th>LAST TOUCH</th><th></th>
+            </tr></thead>
+            <tbody id="contacts-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- LOG TAB -->
+      <div id="tab-log" class="tab-content" style="display:none;animation:up .2s ease">
+        <div class="activity-wrap">
+          <div class="section-title" style="margin-bottom:4px">ACTIVITY LOG</div>
+          <div style="font-size:10px;color:var(--faintest);margin-bottom:16px;font-family:'IBM Plex Sans'">All team activity — your entries highlighted</div>
+          <div class="activity-list" id="activity-list"></div>
+        </div>
+      </div>
+
+      <!-- TEAM TAB -->
+      <div id="tab-team" class="tab-content" style="display:none;animation:up .2s ease">
+        <div class="team-wrap">
+          <div class="section-title" style="margin-bottom:4px">TEAM LEADERBOARD — Q2</div>
+          <div style="font-size:10px;color:var(--faintest);margin-bottom:22px;font-family:'IBM Plex Sans'">Click any rep to view their contacts</div>
+          <div class="team-grid" id="team-grid"></div>
+        </div>
+      </div>
+
+      <!-- AI TAB -->
+      <div id="tab-ai" class="tab-content" style="display:none;animation:up .2s ease">
+        <div class="ai-wrap">
+          <div class="ai-inner">
+
+            <!-- HEADER -->
+            <div class="ai-header" style="margin-bottom:2px">
+              <div>
+                <div class="ai-title">AI SALES COACH</div>
+                <div class="ai-sub" id="ai-sub-text" style="margin-bottom:0">Loading...</div>
+              </div>
+              <div style="display:flex;align-items:center;gap:12px">
+                <div class="stream-toggle">
+                  <span class="stream-label" id="stream-label-full" style="font-weight:700">WAIT</span>
+                  <div class="toggle-track" id="stream-toggle-track" style="background:#e0dbd4" onclick="toggleStream()">
+                    <div class="toggle-thumb" id="stream-toggle-thumb" style="left:3px"></div>
+                  </div>
+                  <span class="stream-label" id="stream-label-stream" style="color:var(--faintest)">STREAM</span>
+                </div>
+                <button onclick="clearConversation()" id="clear-convo-btn" style="display:none;background:none;border:1px solid var(--border);color:var(--muted);padding:4px 10px;cursor:pointer;font-size:9px;font-family:'IBM Plex Mono';font-weight:700;letter-spacing:.06em">✕ CLEAR</button>
+              </div>
+            </div>
+
+            <!-- MODE SELECTOR -->
+            <div style="display:flex;gap:6px;margin:14px 0 16px;flex-wrap:wrap" id="ai-mode-btns">
+              <button class="ai-mode-btn active" data-mode="advice" onclick="setAIMode('advice',this)">💬 Quick Advice</button>
+              <button class="ai-mode-btn" data-mode="email" onclick="setAIMode('email',this)">✉️ Write Email</button>
+              <button class="ai-mode-btn" data-mode="debrief" onclick="setAIMode('debrief',this)">📋 Deal Debrief</button>
+              <button class="ai-mode-btn" data-mode="meddicc" onclick="setAIMode('meddicc',this)">🎯 MEDDICC Audit</button>
+              <button class="ai-mode-btn" data-mode="objection" onclick="setAIMode('objection',this)">🥊 Objection Drill</button>
+              <button class="ai-mode-btn" data-mode="sequence" onclick="setAIMode('sequence',this)">📨 Outreach Sequence</button>
+            </div>
+
+            <!-- MODE DESCRIPTION -->
+            <div id="ai-mode-desc" style="font-size:10px;color:var(--muted);font-family:'IBM Plex Sans';margin-bottom:16px;padding:8px 12px;background:var(--bg);border-left:3px solid var(--accent)"></div>
+
+            <!-- PROMPT EDITOR (collapsed) -->
+            <div id="prompt-editor-section" style="margin-bottom:14px">
+              <button onclick="togglePromptEditor()" style="background:transparent;border:1px solid var(--border);padding:5px 12px;cursor:pointer;font-size:9px;font-family:'IBM Plex Mono';font-weight:700;color:var(--muted);letter-spacing:.06em" id="prompt-editor-toggle-btn">✏ EDIT COACH PERSONA</button>
+              <div id="prompt-editor-wrap" style="display:none;margin-top:10px">
+                <div class="ai-prompt-editor">
+                  <div class="prompt-editor-header">
+                    <div>
+                      <div class="prompt-editor-title">AI COACH SYSTEM PROMPT</div>
+                      <div style="font-size:9px;color:var(--muted);margin-top:2px;font-family:'IBM Plex Sans'">Edit to match your client's product, ICP, and competitors. [REP_NAME] and [PRODUCT_NAME] are auto-replaced.</div>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:8px">
+                      <span class="prompt-saved-toast" id="prompt-saved-toast">✓ SAVED</span>
+                      <button class="prompt-btn reset" onclick="resetSystemPrompt()">RESET</button>
+                      <button class="prompt-btn save" onclick="saveSystemPrompt()">SAVE</button>
+                    </div>
+                  </div>
+                  <textarea class="prompt-textarea" id="system-prompt-editor" rows="10"></textarea>
+                </div>
+              </div>
+            </div>
+
+            <!-- QUICK PROMPTS -->
+            <div class="quick-btns" id="quick-btns"></div>
+
+            <!-- CONVERSATION HISTORY -->
+            <div id="convo-history" style="display:none;margin-bottom:16px;border:1px solid var(--border);max-height:320px;overflow-y:auto"></div>
+
+            <!-- INPUT -->
+            <div style="position:relative">
+              <div id="ai-context-banner" style="display:none;background:var(--bg);border:1px solid var(--border);border-bottom:none;padding:6px 12px;font-size:9px;color:var(--muted);font-family:'IBM Plex Mono';letter-spacing:.04em"></div>
+              <div class="ai-input-row" style="margin-bottom:8px">
+                <textarea class="ai-textarea" id="ai-input" rows="3" placeholder="Describe your situation in detail — deal stage, what happened on the last call, what you're worried about, what you've tried..."></textarea>
+                <button class="ai-send-btn" id="ai-send-btn" onclick="sendAI()">ASK →</button>
+              </div>
+              <div style="display:flex;gap:8px;margin-bottom:20px">
+                <button onclick="injectPipelineContext()" style="background:transparent;border:1px solid var(--border);color:var(--muted);padding:5px 12px;cursor:pointer;font-size:9px;font-family:'IBM Plex Mono';font-weight:700;letter-spacing:.04em" title="Add your current pipeline as context">📊 INJECT MY PIPELINE</button>
+                <button onclick="injectLastActivity()" style="background:transparent;border:1px solid var(--border);color:var(--muted);padding:5px 12px;cursor:pointer;font-size:9px;font-family:'IBM Plex Mono';font-weight:700;letter-spacing:.04em" title="Add your most recent activity log">📝 INJECT LAST ACTIVITY</button>
+                <span style="font-size:9px;color:var(--muted);font-family:'IBM Plex Sans';align-self:center;margin-left:4px">⌘+Enter to send</span>
+              </div>
+            </div>
+
+            <!-- RESPONSE -->
+            <div id="ai-response-box" style="display:none"></div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- SETTINGS TAB -->
+      <div id="tab-settings" class="tab-content" style="display:none;animation:up .2s ease">
+        <div class="settings-wrap">
+          <div class="settings-inner">
+            <div class="section-title" style="margin-bottom:4px">SETTINGS</div>
+            <div style="font-size:10px;color:var(--faintest);margin-bottom:22px;font-family:'IBM Plex Sans'">Customize SalesOS for your client. Changes save to this browser session.</div>
+
+            <div class="settings-section">
+              <div class="settings-section-title">BRANDING</div>
+              <div class="settings-section-sub">Product name, tagline, and company logo shown in the top bar.</div>
+              <div class="settings-row">
+                <div class="settings-field">
+                  <div class="settings-label">PRODUCT NAME</div>
+                  <input class="settings-input" id="s-product-name" placeholder="e.g. Alison AI"/>
+                </div>
+                <div class="settings-field">
+                  <div class="settings-label">TAGLINE / CONTEXT</div>
+                  <input class="settings-input" id="s-tagline" placeholder="e.g. Creative Intelligence Platform"/>
+                </div>
+              </div>
+              <div class="settings-field" style="margin-top:10px">
+                <div class="settings-label">COMPANY LOGO</div>
+                <div style="display:flex;align-items:center;gap:12px;margin-top:6px">
+                  <div id="logo-preview-wrap" style="width:80px;height:40px;background:var(--bg);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;overflow:hidden">
+                    <img id="logo-preview" src="" alt="" style="max-width:76px;max-height:36px;object-fit:contain;display:none"/>
+                    <span id="logo-placeholder" style="font-size:9px;color:var(--muted);letter-spacing:.06em">NO LOGO</span>
+                  </div>
+                  <div>
+                    <button onclick="document.getElementById('logo-file').click()" style="background:var(--dark3);border:none;color:#fff;padding:7px 14px;cursor:pointer;font-size:10px;font-family:'IBM Plex Mono';font-weight:700;letter-spacing:.04em;margin-bottom:6px;display:block">⬆ UPLOAD LOGO</button>
+                    <button id="logo-remove-btn" onclick="removeLogo()" style="display:none;background:none;border:1px solid var(--border);color:var(--muted);padding:5px 14px;cursor:pointer;font-size:10px;font-family:'IBM Plex Mono'">REMOVE</button>
+                    <input type="file" id="logo-file" accept="image/*" style="display:none" onchange="handleLogoUpload(this)"/>
+                  </div>
+                  <div style="font-size:10px;color:var(--muted);font-family:'IBM Plex Sans';line-height:1.5">PNG, SVG, or JPG recommended.<br/>Will replace the SALESOS wordmark.</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="settings-section">
+              <div class="settings-section-title">TEAM MEMBERS</div>
+              <div class="settings-section-sub">Add or remove reps. Changes take effect on next login.</div>
+              <div id="rep-settings-list"></div>
+              <div class="tag-add-row" style="margin-top:12px">
+                <input class="tag-add-input" id="new-rep-name" placeholder="Name (e.g. Sarah J.)"/>
+                <input class="tag-add-input" id="new-rep-role" placeholder="Role (e.g. AE)"/>
+                <input class="tag-add-input" id="new-rep-quota" placeholder="Quota ($)" style="max-width:110px"/>
+                <button class="tag-add-btn" onclick="addRep()">+ ADD</button>
+              </div>
+            </div>
+
+            <div class="settings-section">
+              <div class="settings-section-title">LOGIN CREDENTIALS</div>
+              <div class="settings-section-sub">Set username and password for each team member. The admin rep is set in the CONFIG block at the top of the file. Changes take effect immediately.</div>
+              <div id="credentials-list"></div>
+            </div>
+
+            <div class="settings-section">
+              <div class="settings-section-title">QUICK PROMPTS</div>
+              <div class="settings-section-sub">Customize the scenario buttons shown in the AI Coach tab. One per line.</div>
+              <textarea class="settings-textarea" id="s-quick-prompts" rows="8"></textarea>
+            </div>
+
+            <div style="display:flex;align-items:center;gap:12px;margin-top:6px">
+              <button class="settings-save-btn" onclick="saveSettings()">SAVE SETTINGS →</button>
+              <span class="settings-saved" id="settings-saved-toast">✓ SAVED</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /main -->
+  </div><!-- /body -->
+</div><!-- /app -->
+
+<!-- COPY TOAST -->
+<div class="copy-toast" id="copy-toast">✓ COPIED</div>
+
+<!-- LOG MODAL -->
+<div id="log-modal" class="modal-overlay" style="display:none" onclick="closeLogModal()">
+  <div class="modal" style="width:460px" onclick="event.stopPropagation()">
+    <div class="modal-title" id="log-modal-title">LOG ACTIVITY</div>
+    <div class="type-btns">
+      <button class="type-btn active" style="background:var(--dark3);color:#fff" data-type="call" onclick="setLogType('call',this)">📞 CALL</button>
+      <button class="type-btn" style="background:var(--bg);color:#888" data-type="email" onclick="setLogType('email',this)">✉️ EMAIL</button>
+      <button class="type-btn" style="background:var(--bg);color:#888" data-type="meeting" onclick="setLogType('meeting',this)">🤝 MEETING</button>
+      <button class="type-btn" style="background:var(--bg);color:#888" data-type="note" onclick="setLogType('note',this)">📝 NOTE</button>
+    </div>
+    <textarea class="log-textarea" id="log-note" rows="4" placeholder="What happened? Be specific — this helps AI coaching later."></textarea>
+    <div class="modal-actions">
+      <button class="modal-btn cancel" onclick="closeLogModal()">CANCEL</button>
+      <button class="modal-btn orange" onclick="submitLog()">SAVE LOG →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD CONTACT MODAL -->
+<div id="add-modal" class="modal-overlay" style="display:none" onclick="closeAddModal()">
+  <div class="modal" style="width:480px" onclick="event.stopPropagation()">
+    <div class="modal-title">NEW CONTACT</div>
+    <div class="form-grid">
+      <div style="grid-column:1/3">
+        <div class="form-label">NAME *</div>
+        <input class="form-input" id="nc-name" placeholder="Jane Doe"/>
+      </div>
+      <div>
+        <div class="form-label">COMPANY *</div>
+        <input class="form-input" id="nc-company" placeholder="Acme Corp"/>
+      </div>
+      <div>
+        <div class="form-label">TITLE</div>
+        <input class="form-input" id="nc-title" placeholder="VP Growth"/>
+      </div>
+      <div>
+        <div class="form-label">EMAIL</div>
+        <input class="form-input" id="nc-email" placeholder="jane@acme.com"/>
+      </div>
+      <div>
+        <div class="form-label">DEAL VALUE ($)</div>
+        <input class="form-input" id="nc-value" placeholder="15000" type="number"/>
+      </div>
+      <div>
+        <div class="form-label">STATUS</div>
+        <select class="form-select" id="nc-status">
+          <option>hot</option><option selected>warm</option><option>cold</option>
+        </select>
+      </div>
+      <div>
+        <div class="form-label">OWNER</div>
+        <select class="form-select" id="nc-rep"></select>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="modal-btn cancel" onclick="closeAddModal()">CANCEL</button>
+      <button class="modal-btn primary" onclick="saveNewContact()">ADD CONTACT →</button>
+    </div>
+  </div>
+</div>
+
+<!-- IMPORT MODAL -->
+<div id="import-modal" class="modal-overlay" style="display:none" onclick="closeImportModal()">
+  <div class="modal" style="width:600px;max-height:82vh;display:flex;flex-direction:column" onclick="event.stopPropagation()">
+    <div class="modal-title">IMPORT CONTACTS</div>
+    <div class="modal-sub">Upload a CSV — works with HubSpot, Salesforce, Apollo, LinkedIn Sales Nav exports. Column order doesn't matter.</div>
+    <div id="import-drop-zone" class="import-drop" onclick="document.getElementById('csv-file').click()">
+      <div class="import-drop-icon">📄</div>
+      <div class="import-drop-title">Drop a CSV or click to browse</div>
+      <div class="import-drop-sub">Accepts .csv files</div>
+      <input type="file" id="csv-file" accept=".csv,text/csv" style="display:none" onchange="handleCSV(this)"/>
+    </div>
+    <div id="import-error" class="import-error" style="display:none"></div>
+    <div id="import-preview-wrap" style="display:none">
+      <div class="import-preview-label" id="import-preview-label"></div>
+      <div class="import-preview-wrap" style="flex:1;overflow:auto;border:1px solid var(--border);margin-bottom:14px">
+        <table style="font-size:11px">
+          <thead><tr style="background:var(--bg);border-bottom:1px solid var(--border)">
+            <th>NAME</th><th>COMPANY</th><th>TITLE</th><th>EMAIL</th><th>VALUE</th><th>STATUS</th><th>REP</th>
+          </tr></thead>
+          <tbody id="import-preview-tbody"></tbody>
+        </table>
+        <div id="import-preview-more" class="import-preview-more" style="display:none"></div>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="modal-btn cancel" onclick="closeImportModal()">CANCEL</button>
+      <button class="modal-btn primary" id="import-confirm-btn" style="display:none" onclick="confirmImport()">IMPORT CONTACTS →</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── CONFIG — EDIT THIS SECTION FOR EACH CLIENT ──────────────────────────────
+const CONFIG = {
+  productName: "Alison AI",
+  tagline: "Creative Intelligence Platform",
+  accentColor: "#f97316",
+
+  // ── AUTH: set username + password for each rep. adminName must match a rep's name exactly.
+  adminName: "Jacob B.",   // ← THIS REP GETS FULL ACCESS + SETTINGS TAB
+  resetCode: "reset2024",  // ← ADMIN RESET CODE — change this per client
+  credentials: {
+    "Jacob B.":  { username: "jacob",  password: "admin123" },
+    "Jordan K.": { username: "jordan", password: "jordan123" },
+    "Maya R.":   { username: "maya",   password: "maya123" },
+    "Alex T.":   { username: "alex",   password: "alex123" },
+  },
+
+  defaultReps: [
+    { name:"Jacob B.", avatar:"JB", quota:130000, closed:72000, role:"Senior AE / Team Lead" },
+    { name:"Jordan K.", avatar:"JK", quota:120000, closed:61000, role:"Senior AE" },
+    { name:"Maya R.",   avatar:"MR", quota:100000, closed:44000, role:"AE" },
+    { name:"Alex T.",   avatar:"AT", quota:90000,  closed:29000, role:"AE" },
+  ],
+  defaultSystemPrompt: `You are the person [REP_NAME] calls when a deal gets complicated. Not a coach. Not a consultant. A former AE who carried quota for 12 years, built a sales team at a Series B SaaS company, and has seen every version of a deal go sideways. You and [REP_NAME] have debriefed hundreds of calls together. You talk like that — direct, specific, no posturing, no softening things that shouldn't be softened.
+
+You are not an AI assistant. You do not sound like one. You sound like a person.
+
+THE TEAM'S WORLD:
+The team sells [PRODUCT_NAME] — [PRODUCT_DESCRIPTION]. The pain they sell into: [PAIN_POINTS].
+
+What [PRODUCT_NAME] does: [PRODUCT_CAPABILITIES]. Customers: [CUSTOMERS]. Results: [RESULTS].
+
+Competitors: [COMPETITORS].
+
+The team runs MEDDICC. They care about finding the real economic buyer, locking decision criteria early, and building champions who can sell internally when the rep isn't in the room.
+
+HOW YOU TALK: Like a trusted former colleague. You say "I'd" and "here's what I'd actually do." You're warm but don't waste time. When something looks bad, you say so and say what to do about it. Never say: leverage, synergy, circle back, touch base, utilize, impactful, value-add. Never open with: Great question, Absolutely, Of course, Certainly.
+
+WHEN ASKED FOR ADVICE: Lead with your honest read — 1-2 sentences. Then 2-4 specific things to do in order. If one is an email, write it. End with a gut check only when it genuinely matters.
+
+WHEN WRITING EMAIL: Direct, under 75 words, "Hi" not "Hey," open with something specific to their situation, one sharp point, one ask. No bullets inside the email. Goal is a reply.
+
+ALWAYS: Be hyper-specific. Think about what the buyer is actually afraid of. Think about power dynamics. Flag MEDDICC gaps without naming the framework.`,
+  defaultSystemPrompt: `You are the person [REP_NAME] calls when a deal gets hard. Not a coach. Not an AI. A former AE who carried quota for 12 years, closed $40M+ in SaaS, built a sales team at a Series B, and has seen every version of a deal go sideways — and knows exactly what to do about it. You and [REP_NAME] have debriefed hundreds of calls together. You talk like that.
+
+You are not an assistant. You have opinions. You push back when something doesn't add up. You flag things the rep might not want to hear.
+
+─── THE PRODUCT ───
+The team sells [PRODUCT_NAME]. Know it cold. Know the competitors cold. Know what makes buyers scared to buy, and what makes them regret not buying sooner.
+
+─── HOW YOU THINK ───
+Before giving advice, silently ask yourself:
+1. What is the buyer actually afraid of? (job risk, switching cost, internal politics, budget exposure)
+2. Who has power here — and who thinks they have power but doesn't?
+3. What's the real reason this deal isn't moving? (usually not the stated reason)
+4. What would I do if this were MY deal and my number was on the line?
+5. What's the single most important thing to do in the next 48 hours?
+
+─── DEAL PSYCHOLOGY ───
+Most deals die because of one of five things:
+1. Wrong person — rep is talking to someone who can't actually say yes
+2. No urgency — the pain exists but isn't acute enough to displace the status quo
+3. No champion — no one inside is selling it when the rep isn't in the room
+4. Unclear decision criteria — what "success" looks like was never locked down
+5. Fear of failure — economic buyer is scared of getting this wrong and looking bad
+
+Always diagnose which one (or combination) is actually happening. Then treat that, not the symptoms.
+
+─── MEDDICC THINKING (never name the framework, just use it) ───
+Metrics: Do they have a number that changes if they buy this? If not, the deal has no floor.
+Economic Buyer: Has the rep met them? If no, the deal isn't real yet.
+Decision Criteria: Are the criteria in writing? If not, you're guessing.
+Decision Process: Does the rep know every step, every approval, every person?
+Identify Pain: Is this pain urgent enough to act on NOW? What's the cost of waiting?
+Champion: Can this person sell internally? Have they done it yet?
+Competition: What are they actually comparing this to — including doing nothing?
+
+─── POWER MAPPING ───
+Always think in org chart terms. Who's the Economic Buyer? Who's the technical evaluator? Who's the end user? Who's the internal blocker? What does each person fear about this purchase?
+
+─── HOW YOU TALK ───
+Direct. No softening. Say "I'd" not "you should." Say "here's what I'd actually do." When something looks bad, name it. When a deal is probably dead, say so. Don't validate lazy thinking.
+
+Never say: leverage, synergy, circle back, touch base, utilize, impactful, value-add, reach out, connect, pain points (say "problem" or name the specific thing).
+Never open with: Great question, Absolutely, Of course, Certainly, Happy to help.
+
+─── RESPONSE FORMAT BY MODE ───
+
+QUICK ADVICE: 2 sentences of honest read. Then 2-4 numbered actions. Each action is specific — a real thing to do or say, not a category. If one is an email, write the full email inline. End with "The real risk:" only when there's a genuine trap the rep isn't seeing.
+
+EMAIL MODE: Write one complete email. Under 75 words. Subject line included. "Hi" not "Hey." Open with something specific to their situation, not a generic opener. One sharp insight or observation. One clear ask. No bullets. Close with something that makes ignoring feel like a loss.
+
+DEAL DEBRIEF: Walk through the deal systematically. What's confirmed. What's missing. What's a red flag. Rank the top risk. Give the one move that changes the trajectory.
+
+MEDDICC AUDIT: Score each letter (✅ Confirmed / ⚠️ Weak / ❌ Missing) with one specific line of evidence or gap. End with the single most dangerous gap and what to do about it this week.
+
+OBJECTION DRILL: Give the reframe — not a counter, a reframe. Then write the exact words to say, out loud, in a call. Then the follow-up if they push back again. Real language only — no corporate-speak.
+
+OUTREACH SEQUENCE: 3 touches maximum. Each one shorter than the last. Each has a different angle (insight, social proof, direct ask). Include subject lines. Write all three in full.
+
+─── ALWAYS ───
+Be hyper-specific. Generic advice is worse than no advice. If you need more info to give a real answer, ask one sharp question — not five.`,
+
+  defaultQuickPrompts: [
+    // COLD / STUCK
+    { label:"🧊 Gone cold — worth one more try?", q:"A prospect went cold after 3 touches over 2 weeks. Engaged during demo, then silence. Before I write a breakup email — is there anything worth trying first, or is this done?" },
+    { label:"👻 Champion went dark at proposal", q:"My champion at a $45k deal went dark 12 days ago. We were at proposal stage, they said they were presenting to the CFO. No reply to 2 emails and a voicemail. What do I actually do here?" },
+    { label:"🔒 Stuck in legal 3+ weeks", q:"$55k deal has been in legal review for 3 weeks. My champion says it's moving but can't give me a date. I have zero visibility into what's actually happening. How do I get control back without annoying them?" },
+    { label:"🤝 Re-engage a lost deal — 90 days later", q:"Lost a deal last quarter to 'no decision.' It's been 90 days. They're still spending on the problem we solve. Write me a re-engagement message that doesn't sound desperate and has a real reason to reach out now." },
+    // OBJECTIONS
+    { label:"💸 'Too expensive' vs a competitor", q:"Prospect says we're too expensive compared to a competitor. They're spending $700k/month on paid media. I don't want to discount. What's the exact reframe and what do I say?" },
+    { label:"😴 'Not a priority right now'", q:"Prospect says this isn't a priority right now. They have real pain — I've seen it. They just booked budget for Q3. How do I reframe urgency without creating a fake deadline?" },
+    { label:"🤷 'We already have a solution'", q:"Prospect says they already have a solution in place (a competitor). They're not unhappy with it. How do I find the wedge without trashing the competitor and without starting from scratch?" },
+    { label:"🏢 'Send it to procurement'", q:"I finally got to proposal stage and they said 'send it to procurement.' My champion went quiet. I've never met the economic buyer. What do I do to not lose this in the black hole?" },
+    // DEAL STRATEGY
+    { label:"🔀 Multi-thread without burning my contact", q:"I only have the Director of Growth. Deal is $50k and I need the CMO or CFO to sign. My contact is protective of their relationship with me. How do I get to the economic buyer without them feeling bypassed?" },
+    { label:"🎯 Build urgency — they keep saying next quarter", q:"Hot prospect, real pain, keeps saying 'let's pick this up next quarter.' They said that last quarter too. Budget exists. How do I create a real reason to move now without a fake deadline?" },
+    { label:"📊 CFO is getting involved — I'm not ready", q:"Deal was going smooth and now the CFO wants to see an ROI model before signing. I've never built one for this product. Walk me through how to frame the business case so it doesn't feel made up." },
+    { label:"🕵️ Something feels off — deal health check", q:"Deal feels off. Prospect is responsive but vague. They keep saying everything's good but I can't get commitment on anything — not a timeline, not a next step, not stakeholders. What am I missing and what do I do?" },
+    // OUTREACH
+    { label:"✉️ Breakup email — 6 weeks stalled", q:"Deal has been stalled 6 weeks. Contact is Head of Growth at a DTC brand. Strong demo, then nothing. Write me a breakup email that might actually get a response. Under 75 words." },
+    { label:"🎬 Post-demo follow-up that creates urgency", q:"Just ran a strong demo — VP Growth and creative lead both engaged, lots of questions. Write me a follow-up that locks in next steps, references something specific from the call, and creates real urgency. Under 75 words." },
+    { label:"🥶 Cold outreach — never heard of us", q:"Write a 3-step cold outreach sequence for a VP of Growth at a DTC brand spending $700k/month on Meta and TikTok. They've never heard of our product. Each email under 75 words. Different angle per touch." },
+    { label:"🏆 Displace a competitor they like", q:"Prospect is currently using a competitor and isn't unhappy. DTC brand, $800k/month paid spend. I need to create doubt without being negative. What's the wedge and how do I open that conversation?" },
+  ]
+};
+
+// ─── HELPERS ─────────────────────────────────────────────────────────────────
+const TODAY = new Date();
+const daysAgo = n => { const d = new Date(); d.setDate(d.getDate()-n); return d; };
+const fmtDate = d => { const diff = Math.round((new Date(d)-TODAY)/86400000); if(diff===0)return"Today"; if(diff===-1)return"Yesterday"; if(diff===1)return"Tomorrow"; if(diff<0)return`${Math.abs(diff)}d ago`; return`In ${diff}d`; };
+const fmtMoney = n => n>=1000?`$${(n/1000).toFixed(0)}k`:`$${n}`;
+const pct = (a,b) => Math.min(100,Math.round(a/b*100));
+const LOG_ICONS = {call:"📞",email:"✉️",meeting:"🤝",note:"📝"};
+const id = s => document.getElementById(s);
+const today = new Date(); today.setHours(0,0,0,0);
+
+// ─── STORAGE ─────────────────────────────────────────────────────────────────
+const load = (k,fb) => { try { const r=sessionStorage.getItem(k); if(!r)return fb; const p=JSON.parse(r); if(k==="sos_contacts")return p.map(c=>({...c,lastTouch:new Date(c.lastTouch),nextFollow:new Date(c.nextFollow)})); if(k==="sos_logs")return p.map(l=>({...l,ts:new Date(l.ts)})); return p; } catch{return fb;} };
+const save = (k,v) => { try{sessionStorage.setItem(k,JSON.stringify(v));}catch{} };
+
+// ─── DEFAULT DATA ─────────────────────────────────────────────────────────────
+const DEFAULT_CONTACTS = [
+  {id:1,name:"Sara Okonkwo",company:"BuildFast AI",title:"VP Sales",email:"sara@buildfast.ai",phone:"+1 415 000 1111",value:28000,status:"hot",rep:"Jordan K.",lastTouch:daysAgo(1),nextFollow:daysAgo(-1),touchCount:4,stage:"Demo"},
+  {id:2,name:"Tom Reyes",company:"CloudNine SaaS",title:"CEO",email:"tom@cloudnine.io",phone:"+1 212 000 2222",value:52000,status:"warm",rep:"Maya R.",lastTouch:daysAgo(3),nextFollow:daysAgo(0),touchCount:2,stage:"Proposal"},
+  {id:3,name:"Priya Mehta",company:"DataDriven Co",title:"Head of Ops",email:"priya@datadriven.co",phone:"+1 512 000 3333",value:14000,status:"cold",rep:"Alex T.",lastTouch:daysAgo(9),nextFollow:daysAgo(2),touchCount:1,stage:"Discovery"},
+  {id:4,name:"Mike Brennan",company:"Acme Corp",title:"CTO",email:"mike@acme.com",phone:"+1 650 000 4444",value:75000,status:"hot",rep:"Jordan K.",lastTouch:daysAgo(0),nextFollow:daysAgo(-2),touchCount:7,stage:"Negotiation"},
+  {id:5,name:"Amy Watkins",company:"FlowState Inc",title:"Director of Eng",email:"amy@flowstate.io",phone:"+1 303 000 5555",value:19500,status:"warm",rep:"Maya R.",lastTouch:daysAgo(5),nextFollow:daysAgo(1),touchCount:3,stage:"Demo"},
+  {id:6,name:"Chris Dubois",company:"Elevate Tech",title:"Founder",email:"chris@elevate.tech",phone:"+1 617 000 6666",value:9800,status:"cold",rep:"Alex T.",lastTouch:daysAgo(14),nextFollow:daysAgo(7),touchCount:0,stage:"Discovery"},
+  {id:7,name:"Lena Park",company:"Synapse Labs",title:"CMO",email:"lena@synapse.ai",phone:"+1 206 000 7777",value:33000,status:"hot",rep:"Jacob B.",lastTouch:daysAgo(2),nextFollow:daysAgo(-1),touchCount:5,stage:"Proposal"},
+];
+const DEFAULT_LOGS = [
+  {id:1,contactId:1,type:"call",note:"Strong demo — asked about enterprise pricing. Wants follow-up with technical team.",rep:"Jordan K.",ts:daysAgo(1)},
+  {id:2,contactId:2,type:"email",note:"Sent proposal deck. CC'd their CFO per request.",rep:"Maya R.",ts:daysAgo(3)},
+  {id:3,contactId:4,type:"meeting",note:"In-person visit. Very aligned. Legal review starting next week.",rep:"Jordan K.",ts:daysAgo(0)},
+  {id:4,contactId:5,type:"email",note:"No response to last 2 emails. Trying a breakup email.",rep:"Maya R.",ts:daysAgo(5)},
+  {id:5,contactId:7,type:"call",note:"Budget confirmed $30k. Decision by end of month.",rep:"Jacob B.",ts:daysAgo(2)},
+];
+
+// ─── STATE ─────────────────────────────────────────────────────────────────────
+let currentRep = load("sos_rep", null);
+let isAdmin = currentRep ? currentRep.name === CONFIG.adminName : false;
+let pendingAuthRep = null; // rep selected on login screen, awaiting password
+let contacts = load("sos_contacts", DEFAULT_CONTACTS);
+let logs = load("sos_logs", DEFAULT_LOGS);
+let reps = load("sos_reps", CONFIG.defaultReps);
+let selectedContact = null;
+let logTargetId = null;
+let logType = "call";
+let statusFilter = "all";
+let repFilter = "all";
+let urgencyFilter = "all";
+let importPreview = [];
+let streamMode = false;
+let aiLoading = false;
+let aiMode = "advice";
+let conversationHistory = []; // multi-turn memory
+let customSystemPrompt = load("sos_system_prompt", null);
+let customQuickPrompts = load("sos_quick_prompts", null);
+let clientConfig = load("sos_client_config", { productName: CONFIG.productName, tagline: CONFIG.tagline });
+
+// ─── SYSTEM PROMPT BUILDER ────────────────────────────────────────────────────
+function buildSystemPrompt(repName) {
+  const prompt = customSystemPrompt || CONFIG.defaultSystemPrompt;
+  return prompt.replace(/\[REP_NAME\]/g, repName).replace(/\[PRODUCT_NAME\]/g, clientConfig.productName || CONFIG.productName);
+}
+
+function getActiveSystemPrompt() {
+  return customSystemPrompt || CONFIG.defaultSystemPrompt;
+}
+
+function applyBranding() {
+  const name = clientConfig.productName || CONFIG.productName;
+  const tag = clientConfig.tagline || CONFIG.tagline;
+  id("login-brand-tag").textContent = name.toUpperCase() + " · INTERNAL TOOL";
+  id("topbar-brand-tag").textContent = name.toUpperCase();
+  // Logo
+  const logoData = load("sos_logo", null);
+  const logoImg = id("topbar-logo");
+  const brandName = id("topbar-brand-name");
+  if (logoData) {
+    logoImg.src = logoData; logoImg.style.display = "block";
+    brandName.style.display = "none";
+  } else {
+    logoImg.style.display = "none";
+    brandName.style.display = "block";
+  }
+}
+
+function handleLogoUpload(input) {
+  const file = input.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const data = e.target.result;
+    save("sos_logo", data);
+    applyBranding();
+    renderLogoPreview(data);
+  };
+  reader.readAsDataURL(file);
+}
+
+function removeLogo() {
+  sessionStorage.removeItem("sos_logo");
+  applyBranding();
+  renderLogoPreview(null);
+}
+
+function renderLogoPreview(data) {
+  const preview = id("logo-preview"), placeholder = id("logo-placeholder"), removeBtn = id("logo-remove-btn");
+  if (!preview) return;
+  if (data) {
+    preview.src = data; preview.style.display = "block";
+    placeholder.style.display = "none"; removeBtn.style.display = "block";
+  } else {
+    preview.src = ""; preview.style.display = "none";
+    placeholder.style.display = "block"; removeBtn.style.display = "none";
+  }
+}
+
+function showLogin() {
+  id("login").style.display = "flex";
+  id("auth-screen").classList.remove("visible");
+  id("app").classList.remove("visible");
+  renderLoginReps();
+}
+
+function backToLogin() {
+  pendingAuthRep = null;
+  id("auth-screen").classList.remove("visible");
+  id("login").style.display = "flex";
+  id("auth-error").textContent = "";
+  id("auth-username").value = "";
+  id("auth-password").value = "";
+}
+
+function renderLoginReps() {
+  const list = id("rep-list");
+  list.innerHTML = "";
+  reps.forEach((r,i) => {
+    const card = document.createElement("div");
+    card.className = "rep-card";
+    card.style.animationDelay = `${0.2+i*0.07}s`;
+    const isAdminRep = r.name === CONFIG.adminName;
+    card.innerHTML = `
+      <div class="rep-avatar">${r.avatar||r.name.substring(0,2).toUpperCase()}</div>
+      <div style="flex:1">
+        <div class="rep-name">${r.name}</div>
+        <div class="rep-role">${r.role}${isAdminRep?' <span style="color:var(--accent);font-size:9px;letter-spacing:.06em">★ ADMIN</span>':''}</div>
+      </div>
+      <span class="rep-arrow">›</span>`;
+    card.onclick = () => showAuthScreen(r);
+    list.appendChild(card);
+  });
+}
+
+function showAuthScreen(rep) {
+  pendingAuthRep = rep;
+  id("login").style.display = "none";
+  id("auth-brand-sub").textContent = (clientConfig.productName || CONFIG.productName).toUpperCase() + " · INTERNAL TOOL";
+  id("auth-avatar").textContent = rep.avatar || rep.name.substring(0,2).toUpperCase();
+  id("auth-name").textContent = rep.name;
+  id("auth-role").textContent = rep.role;
+  id("auth-error").textContent = "";
+  id("auth-username").value = "";
+  id("auth-password").value = "";
+  id("auth-screen").classList.add("visible");
+  setTimeout(() => id("auth-username").focus(), 300);
+}
+
+function submitAuth() {
+  if (!pendingAuthRep) return;
+  const uname = id("auth-username").value.trim().toLowerCase();
+  const pass = id("auth-password").value;
+  const savedCreds = load("sos_credentials", {});
+  // Saved creds take full priority — fall back to CONFIG only if nothing saved yet
+  const saved = savedCreds[pendingAuthRep.name];
+  const configCreds = CONFIG.credentials[pendingAuthRep.name];
+  const creds = saved || configCreds;
+  if (!creds || !creds.username || !creds.password) {
+    id("auth-error").textContent = "No credentials configured for this user. Contact your admin.";
+    return;
+  }
+  if (uname !== creds.username.toLowerCase() || pass !== creds.password) {
+    id("auth-error").textContent = "Incorrect username or password.";
+    id("auth-password").value = "";
+    id("auth-password").focus();
+    return;
+  }
+  login(pendingAuthRep);
+}
+
+function login(rep) {
+  currentRep = rep;
+  isAdmin = rep.name === CONFIG.adminName;
+  save("sos_rep", rep);
+  id("auth-screen").classList.remove("visible");
+  id("login").style.display = "none";
+  showApp();
+}
+
+function logout() {
+  sessionStorage.removeItem("sos_rep");
+  currentRep = null;
+  isAdmin = false;
+  pendingAuthRep = null;
+  selectedContact = null;
+  conversationHistory = [];
+  id("app").classList.remove("visible");
+  id("detail").classList.remove("visible");
+  showLogin();
+}
+
+function showApp() {
+  id("login").style.display = "none";
+  id("auth-screen").classList.remove("visible");
+  id("app").classList.add("visible");
+  id("cur-avatar").textContent = currentRep.avatar || currentRep.name.substring(0,2).toUpperCase();
+  id("cur-name").textContent = currentRep.name;
+  id("cur-role").textContent = currentRep.role;
+  // Admin-only UI
+  id("settings-nav-btn").style.display = isAdmin ? "flex" : "none";
+  id("admin-badge").style.display = isAdmin ? "inline-flex" : "none";
+  // Non-admin: lock contacts view to own contacts only
+  if (!isAdmin) { repFilter = currentRep.name; }
+  populateRepSelect();
+  renderStats();
+  renderFollowUps();
+  renderAITab();
+  if (isAdmin) renderSettings();
+}
+
+// ─── TABS ─────────────────────────────────────────────────────────────────────
+function switchTab(tabId, btn) {
+  document.querySelectorAll(".tab-content").forEach(t => t.style.display = "none");
+  document.querySelectorAll(".nav-btn").forEach(b => b.classList.remove("active"));
+  const tabEl = id("tab-"+tabId);
+  if (tabEl) { tabEl.style.display = "flex"; if(tabEl.style.flexDirection!=="column")tabEl.style.display="block"; }
+  const navBtn = btn || document.querySelector(`[data-tab="${tabId}"]`);
+  if (navBtn) navBtn.classList.add("active");
+  if (tabId==="follow") { tabEl.style.display="flex"; tabEl.style.flexDirection="column"; renderFollowUps(); }
+  if (tabId==="contacts") { tabEl.style.display="flex"; tabEl.style.flexDirection="column"; renderContacts(); }
+  if (tabId==="log") { tabEl.style.display="block"; renderActivity(); }
+  if (tabId==="team") { tabEl.style.display="block"; renderTeam(); }
+  if (tabId==="ai") { tabEl.style.display="block"; renderAITab(); }
+  if (tabId==="settings") { if(!isAdmin){switchTab("follow");return;} tabEl.style.display="block"; renderSettings(); }
+}
+
+// ─── STATS ─────────────────────────────────────────────────────────────────────
+function renderStats() {
+  const overdue = contacts.filter(c => new Date(c.nextFollow) < today);
+  const dueToday = contacts.filter(c => fmtDate(c.nextFollow)==="Today");
+  const mine = contacts.filter(c => c.rep===currentRep.name);
+  const pipe = contacts.reduce((s,c)=>s+c.value,0);
+  const avgTouch = contacts.length ? (contacts.reduce((s,c)=>s+c.touchCount,0)/contacts.length).toFixed(1) : "0";
+  id("s-overdue").textContent = overdue.length;
+  id("s-today").textContent = dueToday.length;
+  id("s-mine").textContent = mine.length;
+  id("s-pipe").textContent = fmtMoney(pipe);
+  id("s-touches").textContent = avgTouch;
+  const badge = id("overdue-badge");
+  if (overdue.length) { badge.textContent = overdue.length; badge.style.display="inline"; }
+  else badge.style.display="none";
+}
+
+function setUrgencyFilter(v) { urgencyFilter=v; renderFollowUps(); }
+function setRepFilter(v) {
+  // Non-admins can only view their own contacts
+  repFilter = isAdmin ? v : currentRep.name;
+  renderContacts(); switchTab("contacts");
+}
+function setStatusFilter(v, btn) {
+  statusFilter=v;
+  document.querySelectorAll(".chip").forEach(c=>c.classList.remove("active"));
+  if(btn)btn.classList.add("active");
+  renderContacts();
+}
+
+// ─── FOLLOW-UPS ──────────────────────────────────────────────────────────────
+function renderFollowUps() {
+  const ftag = id("follow-filter-tags"); ftag.innerHTML="";
+  if (urgencyFilter!=="all") {
+    const tag = document.createElement("div");
+    tag.className = `filter-tag ${urgencyFilter==="overdue"?"red":"orange"}`;
+    tag.innerHTML = `${urgencyFilter==="overdue"?"OVERDUE":"DUE TODAY"} <span class="filter-tag-close" onclick="setUrgencyFilter('all')">✕</span>`;
+    ftag.appendChild(tag);
+  }
+  let list = [...contacts].sort((a,b)=>new Date(a.nextFollow)-new Date(b.nextFollow));
+  if (urgencyFilter==="overdue") list=list.filter(c=>new Date(c.nextFollow)<today);
+  if (urgencyFilter==="today") list=list.filter(c=>fmtDate(c.nextFollow)==="Today");
+  const tbody = id("follow-tbody"); tbody.innerHTML="";
+  list.forEach(c => {
+    const isOv = new Date(c.nextFollow)<today, isTd=fmtDate(c.nextFollow)==="Today", isMe=c.rep===currentRep.name;
+    const tr = document.createElement("tr");
+    tr.style.background = isOv?"#fffaf8":"#fff";
+    tr.onclick = ()=>openDetail(c);
+    tr.innerHTML = `
+      <td><div style="display:flex;align-items:center;gap:7px">
+        ${isMe?`<div class="dot-indicator"></div>`:""}
+        <div><div class="contact-name">${c.name}</div><div class="contact-sub">${c.title||""}</div></div>
+      </div></td>
+      <td style="font-size:12px">${c.company}</td>
+      <td><span class="money">${fmtMoney(c.value)}</span></td>
+      <td><span class="tag ${c.status}">${c.status.toUpperCase()}</span></td>
+      <td class="stage-cell">${c.stage}</td>
+      <td class="owner-cell" style="color:${isMe?"var(--accent)":"var(--muted)"};font-weight:${isMe?700:400}">${c.rep}</td>
+      <td style="font-size:11px;color:${c.touchCount===0?"var(--red)":"var(--faintest)"}">${fmtDate(c.lastTouch)}</td>
+      <td><span class="date-pill ${isOv?"overdue":isTd?"today":"normal"}">${fmtDate(c.nextFollow)}</span></td>
+      <td><div class="touch-dots">${c.touchCount===0?`<span class="never-tag">NEVER</span>`:Array.from({length:Math.min(c.touchCount,8)}).map((_,i)=>`<div class="touch-dot" style="opacity:${1-i*.1}"></div>`).join("")}</div></td>
+      <td class="row-actions"><button class="row-btn orange" onclick="event.stopPropagation();openLog(${c.id})">LOG</button></td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+// ─── CONTACTS ─────────────────────────────────────────────────────────────────
+function renderContacts() {
+  let list = contacts.filter(c=>(statusFilter==="all"||c.status===statusFilter)&&(repFilter==="all"||c.rep===repFilter));
+  id("contacts-count").textContent=`(${list.length})`;
+  const rtag = id("rep-filter-tag");
+  if (repFilter!=="all") {
+    rtag.style.display="flex";
+    // Only admin can clear the rep filter
+    const clearBtn = isAdmin ? `<span class="filter-tag-close" onclick="setRepFilter('all');id('rep-filter-tag').style.display='none'">✕</span>` : '';
+    rtag.innerHTML=`${repFilter} ${clearBtn}`;
+  } else rtag.style.display="none";
+  const tbody = id("contacts-tbody"); tbody.innerHTML="";
+  list.forEach((c,i) => {
+    const isMe=c.rep===currentRep.name;
+    const tr=document.createElement("tr");
+    tr.style.animation=`up .15s ease ${i*.02}s both`;
+    tr.onclick=()=>openDetail(c);
+    tr.innerHTML=`
+      <td><div class="contact-name">${c.name}</div><div class="contact-email">${c.email||""}</div></td>
+      <td style="font-size:12px">${c.company}</td>
+      <td><span class="money" style="font-size:13px">${fmtMoney(c.value)}</span></td>
+      <td><span class="tag ${c.status}">${c.status.toUpperCase()}</span></td>
+      <td class="stage-cell">${c.stage}</td>
+      <td class="owner-cell" style="color:${isMe?"var(--accent)":"var(--muted)"};font-weight:${isMe?700:400}">${c.rep}</td>
+      <td class="touch-cell">${fmtDate(c.lastTouch)}</td>
+      <td class="row-actions">
+        <button class="row-btn dark" onclick="event.stopPropagation();openLog(${c.id})">LOG</button>
+        <button class="row-btn orange" onclick="event.stopPropagation();aiCoachForContact(${c.id})">AI</button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+// ─── ACTIVITY ────────────────────────────────────────────────────────────────
+function renderActivity() {
+  const list = id("activity-list"); list.innerHTML="";
+  [...logs].sort((a,b)=>new Date(b.ts)-new Date(a.ts)).forEach((l,i) => {
+    const c=contacts.find(x=>x.id===l.contactId), isMe=l.rep===currentRep.name;
+    const div=document.createElement("div");
+    div.className=`activity-item${isMe?" mine":""}`;
+    if(c)div.onclick=()=>openDetail(c);
+    div.innerHTML=`
+      <div class="activity-icon-wrap">${LOG_ICONS[l.type]||"📝"}</div>
+      <div class="activity-content">
+        <div class="activity-meta">
+          <span class="activity-contact">${c?.name||"Unknown"}</span>
+          <span class="activity-company">@ ${c?.company||""}</span>
+          <span class="activity-date" style="color:${isMe?"var(--accent)":"var(--faintest)"};font-weight:${isMe?700:400}">${fmtDate(l.ts)} · ${l.rep}</span>
+        </div>
+        <div class="activity-note">${l.note}</div>
+      </div>
+      <span class="activity-type">${l.type.toUpperCase()}</span>
+    `;
+    list.appendChild(div);
+  });
+}
+
+// ─── TEAM ─────────────────────────────────────────────────────────────────────
+function renderTeam() {
+  const grid=id("team-grid"); grid.innerHTML="";
+  [...reps].sort((a,b)=>b.closed-a.closed).forEach(r=>{
+    const isMe=r.name===currentRep.name, contactCount=contacts.filter(c=>c.rep===r.name).length;
+    const div=document.createElement("div");
+    div.className=`rep-card-dash${isMe?" me":""}`;
+    div.onclick=()=>{setRepFilter(r.name);switchTab("contacts");};
+    div.innerHTML=`
+      ${isMe?`<div class="rep-you-badge">YOU</div>`:""}
+      <div class="rep-card-top">
+        <div class="rep-dash-avatar" style="background:${isMe?"var(--accent)":"var(--dark3)"}">
+          ${r.avatar||r.name.substring(0,2).toUpperCase()}
+        </div>
+        <div style="flex:1">
+          <div class="rep-dash-name">${r.name}</div>
+          <div class="rep-dash-sub">${r.role} · ${contactCount} contacts</div>
+        </div>
+        <div>
+          <div class="rep-quota-pct" style="color:${isMe?"var(--accent)":"var(--dark3)"}">${pct(r.closed,r.quota)}%</div>
+          <div class="rep-quota-sub">of quota</div>
+        </div>
+      </div>
+      <div class="rep-progress">
+        <div class="rep-progress-bar" style="width:${pct(r.closed,r.quota)}%;background:${isMe?"var(--accent)":"var(--dark3)"}"></div>
+      </div>
+      <div class="rep-stats">
+        <span>CLOSED ${fmtMoney(r.closed)}</span>
+        <span>QUOTA ${fmtMoney(r.quota)}</span>
+        <span style="color:${r.closed<r.quota?"var(--red)":"var(--green)"}">GAP ${fmtMoney(Math.max(0,r.quota-r.closed))}</span>
+      </div>
+    `;
+    grid.appendChild(div);
+  });
+}
+
+// ─── DETAIL PANEL ─────────────────────────────────────────────────────────────
+function openDetail(c) {
+  selectedContact=c;
+  id("d-name").textContent=c.name;
+  id("d-sub").textContent=`${c.title||""} · ${c.company}`;
+  const tags=id("d-tags");
+  tags.innerHTML=`<span class="tag ${c.status}">${c.status.toUpperCase()}</span>`;
+  if(c.hsUrl)tags.innerHTML+=`<a href="${c.hsUrl}" target="_blank" class="hs-link">VIEW IN HUBSPOT ↗</a>`;
+  const fields=[
+    {l:"EMAIL",v:c.email||"—"},{l:"PHONE",v:c.phone||"—"},{l:"VALUE",v:fmtMoney(c.value)},
+    {l:"STAGE",v:c.stage},{l:"OWNER",v:c.rep},{l:"LAST TOUCH",v:fmtDate(c.lastTouch)},
+    {l:"NEXT FOLLOW",v:fmtDate(c.nextFollow)},{l:"TOUCHES",v:`${c.touchCount} logged`}
+  ];
+  id("d-fields").innerHTML=fields.map(f=>`<div class="field-row"><span class="field-label">${f.l}</span><span class="field-value">${f.v}</span></div>`).join("");
+  const entries=logs.filter(l=>l.contactId===c.id);
+  const logEl=id("d-log-entries");
+  if(!entries.length){logEl.innerHTML=`<div style="font-size:11px;color:var(--faintest);font-style:italic">No activity yet.</div>`;
+  }else{logEl.innerHTML=entries.map(l=>`<div class="log-entry"><div class="log-entry-meta"><span class="log-entry-icon">${LOG_ICONS[l.type]}</span><span class="log-entry-info">${fmtDate(l.ts)} · ${l.rep}</span></div><div class="log-entry-note">${l.note}</div></div>`).join("");}
+  id("detail").classList.add("visible");
+}
+
+function closeDetail(){id("detail").classList.remove("visible");selectedContact=null;}
+function openLogForSelected(){if(selectedContact)openLog(selectedContact.id);}
+function aiCoachForSelected(){if(selectedContact)aiCoachForContact(selectedContact.id);}
+
+function aiCoachForContact(cid) {
+  const c=contacts.find(x=>x.id===cid); if(!c)return;
+  const q=`Honest read on this deal and what I should do next.\n\nContact: ${c.name}, ${c.title} at ${c.company}\nDeal value: ${fmtMoney(c.value)}\nStage: ${c.stage} / Status: ${c.status}\nLast touched: ${fmtDate(c.lastTouch)} / Touches: ${c.touchCount}\nNext follow-up was due: ${fmtDate(c.nextFollow)}\n\nWhere does this actually stand and what should I say or do right now?`;
+  id("ai-input").value=q;
+  switchTab("ai");
+  sendAI();
+}
+
+// ─── LOG MODAL ────────────────────────────────────────────────────────────────
+function openLog(cid){
+  logTargetId=cid; logType="call";
+  const c=contacts.find(x=>x.id===cid);
+  id("log-modal-title").textContent=`LOG ACTIVITY — ${c?.name||""}`;
+  id("log-note").value="";
+  document.querySelectorAll(".type-btn").forEach(b=>{b.style.background=b.dataset.type==="call"?"var(--dark3)":"var(--bg)";b.style.color=b.dataset.type==="call"?"#fff":"#888";});
+  id("log-modal").style.display="flex";
+}
+
+function closeLogModal(){id("log-modal").style.display="none";}
+
+function setLogType(t,btn){
+  logType=t;
+  document.querySelectorAll(".type-btn").forEach(b=>{b.style.background=b.dataset.type===t?"var(--dark3)":"var(--bg)";b.style.color=b.dataset.type===t?"#fff":"#888";});
+}
+
+function submitLog(){
+  const note=id("log-note").value.trim(); if(!note)return;
+  const c=contacts.find(x=>x.id===logTargetId);
+  const rep=c?.rep||currentRep.name;
+  const newLog={id:Date.now(),contactId:logTargetId,type:logType,note,rep,ts:new Date()};
+  logs=[newLog,...logs]; save("sos_logs",logs);
+  contacts=contacts.map(x=>x.id===logTargetId?{...x,lastTouch:new Date(),touchCount:x.touchCount+1}:x);
+  save("sos_contacts",contacts);
+  if(selectedContact&&selectedContact.id===logTargetId)openDetail(contacts.find(x=>x.id===logTargetId)||selectedContact);
+  closeLogModal(); renderStats();
+}
+
+// ─── ADD CONTACT ──────────────────────────────────────────────────────────────
+function populateRepSelect(){
+  const sel=id("nc-rep"); sel.innerHTML="";
+  reps.forEach(r=>{const o=document.createElement("option");o.value=r.name;o.textContent=r.name;if(r.name===currentRep.name)o.selected=true;sel.appendChild(o);});
+}
+
+function openAddContact(){id("add-modal").style.display="flex";}
+function closeAddModal(){id("add-modal").style.display="none";}
+function saveNewContact(){
+  const name=id("nc-name").value.trim(), company=id("nc-company").value.trim();
+  if(!name||!company)return;
+  const nc={id:Date.now(),name,company,title:id("nc-title").value.trim(),email:id("nc-email").value.trim(),phone:"",value:parseInt(id("nc-value").value)||0,status:id("nc-status").value,rep:id("nc-rep").value,stage:"Discovery",lastTouch:daysAgo(99),nextFollow:new Date(),touchCount:0};
+  contacts=[...contacts,nc]; save("sos_contacts",contacts);
+  closeAddModal(); renderStats(); renderFollowUps();
+  ["nc-name","nc-company","nc-title","nc-email","nc-value"].forEach(i=>id(i).value="");
+}
+
+// ─── IMPORT ───────────────────────────────────────────────────────────────────
+function openImport(){id("import-modal").style.display="flex";importPreview=[];id("import-preview-wrap").style.display="none";id("import-error").style.display="none";id("import-confirm-btn").style.display="none";}
+function closeImportModal(){id("import-modal").style.display="none";id("csv-file").value="";}
+
+function handleCSV(input){
+  const file=input.files[0]; if(!file)return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    try{
+      const lines=e.target.result.trim().split(/\r?\n/);
+      if(lines.length<2){showImportError("No valid rows found.");return;}
+      const hdrs=lines[0].split(",").map(h=>h.trim().toLowerCase().replace(/[^a-z0-9]/g,""));
+      const mc=(hs,ks)=>hs.findIndex(h=>ks.some(k=>h.includes(k)));
+      const iN=mc(hdrs,["name","fullname","contact"]),iCo=mc(hdrs,["company","organization","account"]),
+            iT=mc(hdrs,["title","jobtitle","role"]),iE=mc(hdrs,["email","mail"]),
+            iV=mc(hdrs,["value","deal","amount","revenue","arr","mrr"]),iS=mc(hdrs,["status","temperature"]),
+            iR=mc(hdrs,["rep","owner","assignee"]),iSt=mc(hdrs,["stage","phase"]);
+      const g=(row,i)=>i>=0&&row[i]?row[i].replace(/^"|"$/g,"").trim():"";
+      importPreview=lines.slice(1).filter(l=>l.trim()).map(line=>{
+        const row=line.split(","), rs=g(row,iS).toLowerCase();
+        return{id:Date.now()+Math.random(),name:g(row,iN)||"Unknown",company:g(row,iCo)||"",title:g(row,iT)||"",email:g(row,iE)||"",value:parseInt(g(row,iV).replace(/[^0-9.]/g,""))||0,status:rs==="hot"?"hot":rs==="cold"?"cold":"warm",rep:g(row,iR)||currentRep.name,stage:g(row,iSt)||"Discovery",phone:"",lastTouch:daysAgo(99),nextFollow:new Date(),touchCount:0};
+      }).filter(c=>c.name!=="Unknown"||c.email);
+      if(!importPreview.length){showImportError("No valid rows found.");return;}
+      renderImportPreview();
+    }catch{showImportError("Could not parse file.");}
+  };
+  reader.readAsText(file);
+}
+
+function showImportError(msg){const e=id("import-error");e.textContent=msg;e.style.display="block";}
+
+function renderImportPreview(){
+  id("import-error").style.display="none";
+  id("import-preview-label").textContent=`PREVIEW — ${importPreview.length} CONTACTS FOUND`;
+  id("import-preview-wrap").style.display="block";
+  const tbody=id("import-preview-tbody"); tbody.innerHTML="";
+  importPreview.slice(0,10).forEach(c=>{
+    const tr=document.createElement("tr");
+    tr.style.borderBottom="1px solid var(--border2)";
+    tr.innerHTML=`<td style="padding:8px 11px;font-weight:600">${c.name}</td><td style="padding:8px 11px;color:#555">${c.company||"—"}</td><td style="padding:8px 11px;color:#777">${c.title||"—"}</td><td style="padding:8px 11px;color:#777">${c.email||"—"}</td><td style="padding:8px 11px;font-weight:700;font-family:'IBM Plex Mono'">${c.value?fmtMoney(c.value):"—"}</td><td style="padding:8px 11px"><span class="tag small ${c.status}">${c.status.toUpperCase()}</span></td><td style="padding:8px 11px;color:#777">${c.rep}</td>`;
+    tbody.appendChild(tr);
+  });
+  const more=id("import-preview-more");
+  if(importPreview.length>10){more.textContent=`+ ${importPreview.length-10} more contacts not shown`;more.style.display="block";}
+  else more.style.display="none";
+  const btn=id("import-confirm-btn"); btn.style.display="block"; btn.textContent=`IMPORT ${importPreview.length} CONTACTS →`;
+}
+
+function confirmImport(){
+  contacts=[...contacts,...importPreview]; save("sos_contacts",contacts);
+  closeImportModal(); renderStats(); renderFollowUps();
+}
+
+// ─── HUBSPOT SYNC ─────────────────────────────────────────────────────────────
+async function syncHubSpot(){
+  const btn=id("hs-sync-btn"); btn.textContent="SYNCING..."; btn.disabled=true;
+  try{
+    const res=await fetch("https://api.hubapi.com/crm/v3/objects/contacts/search",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({filterGroups:[],properties:["firstname","lastname","email","phone","company","jobtitle","hubspot_owner_id","lifecyclestage","hs_lead_status","notes_last_contacted","notes_next_activity_date","num_contacted_notes"],limit:100})});
+    if(!res.ok)throw new Error(`HTTP ${res.status}`);
+    const data=await res.json();
+    const mapped=(data.results||[]).map(c=>{
+      const p=c.properties, fullName=[p.firstname,p.lastname].filter(Boolean).join(" ")||p.email||"Unknown";
+      return{id:`hs_${c.id}`,hsId:c.id,name:fullName,company:p.company||"",title:p.jobtitle||"",email:p.email||"",phone:p.phone||"",value:0,status:"warm",rep:currentRep.name,stage:"Discovery",touchCount:parseInt(p.num_contacted_notes)||0,lastTouch:p.notes_last_contacted?new Date(p.notes_last_contacted):daysAgo(30),nextFollow:p.notes_next_activity_date?new Date(p.notes_next_activity_date):new Date(),hsUrl:`https://app.hubspot.com/contacts/record/0-1/${c.id}`,source:"hubspot"};
+    });
+    const manual=contacts.filter(c=>!c.source||c.source!=="hubspot");
+    contacts=[...manual,...mapped]; save("sos_contacts",contacts);
+    btn.textContent=`✓ HUBSPOT (${mapped.length})`; btn.className="topbar-btn accent synced"; btn.disabled=false;
+    renderStats();
+  }catch(err){
+    btn.textContent="⟳ SYNC HUBSPOT"; btn.disabled=false;
+    const banner=id("hs-banner"); banner.classList.add("visible");
+    id("hs-banner-text").textContent="⚠ HubSpot sync requires a Private App token. Add your token to enable live sync. Demo data is shown instead.";
+  }
+}
+
+// ─── AI TAB ───────────────────────────────────────────────────────────────────
+const AI_MODES = {
+  advice:   { label:"Quick Advice",       desc:"Honest read on a situation + specific next moves. Best for: stuck deals, weird signals, what-do-I-do moments." },
+  email:    { label:"Write Email",        desc:"Writes one complete email — under 75 words, subject included. Tell me the context and goal. I'll write it." },
+  debrief:  { label:"Deal Debrief",       desc:"Full deal review — what's confirmed, what's missing, what's a red flag, and the one move that changes the trajectory." },
+  meddicc:  { label:"MEDDICC Audit",      desc:"Score every dimension of your deal. Tell me what you know and I'll tell you exactly where the holes are and what to fix first." },
+  objection:{ label:"Objection Drill",    desc:"Give me the objection word-for-word. I'll give you the reframe, the exact language to use on the call, and the comeback if they push." },
+  sequence: { label:"Outreach Sequence",  desc:"3-touch cold or re-engagement sequence. Give me the prospect, company, pain, and context. I'll write all three emails in full." },
+};
+
+const MODE_SYSTEM_ADDITIONS = {
+  advice:    "",
+  email:     "\n\nMODE: EMAIL WRITING. Write one complete email. Subject line on the first line prefixed 'Subject:'. Under 75 words in the body. 'Hi' not 'Hey.' One specific opener tied to their situation. One sharp point. One ask. No bullets. Make ignoring it feel like a loss.",
+  debrief:   "\n\nMODE: DEAL DEBRIEF. Structure your response: (1) What's confirmed and working. (2) What's missing or unverified. (3) Red flags. (4) Top risk ranked. (5) The single move that changes the deal's trajectory. Be clinical.",
+  meddicc:   "\n\nMODE: MEDDICC AUDIT. Score each letter with a status prefix: ✅ Confirmed, ⚠️ Weak, or ❌ Missing. Format each as: [LETTER] [STATUS]: [one-line evidence or gap]. After all seven, give 'BIGGEST GAP:' and 'THIS WEEK:' sections.",
+  objection: "\n\nMODE: OBJECTION DRILL. Format: REFRAME (the real thing happening), WHAT TO SAY (exact words for a live call — no corporate speak), PUSHBACK (what to say if they push back again), ROOT CAUSE (what this objection usually actually means).",
+  sequence:  "\n\nMODE: OUTREACH SEQUENCE. Write exactly 3 emails. Label them TOUCH 1, TOUCH 2, TOUCH 3. Each has Subject: and body. Each body under 75 words. Each has a different angle. Touch 3 is a direct ask or pattern interrupt. All three complete and ready to send.",
+};
+
+function setAIMode(mode, btn) {
+  aiMode = mode;
+  document.querySelectorAll(".ai-mode-btn").forEach(b => b.classList.remove("active"));
+  if (btn) btn.classList.add("active");
+  const modeInfo = AI_MODES[mode];
+  id("ai-mode-desc").textContent = modeInfo.desc;
+  const placeholders = {
+    advice:    "Describe the situation — deal stage, what happened on the last call, what's not moving and why you think that is...",
+    email:     "Who is this to? What's their title and company? What happened last? What do you want them to do? Any context I should know...",
+    debrief:   "Walk me through the deal — who you've talked to, what they've said, where it is in the process, what you know and don't know...",
+    meddicc:   "Tell me everything you know about the deal — stakeholders, budget, timeline, what they've said yes/no to, competition...",
+    objection: "What exactly did they say? Paste the exact words if you have them. What's the context — stage, role, what came before it...",
+    sequence:  "Who is the prospect? Company, title, what they do. What's their pain? Have they heard of you? What's the goal of the sequence...",
+  };
+  id("ai-input").placeholder = placeholders[mode];
+}
+
+function renderAITab() {
+  id("ai-sub-text").textContent = `${currentRep?.name||"you"} · ${AI_MODES[aiMode]?.label||"Quick Advice"} · Multi-turn`;
+  const toggle=id("stream-toggle-track"), thumb=id("stream-toggle-thumb");
+  toggle.style.background=streamMode?"var(--accent)":"#e0dbd4";
+  thumb.style.left=streamMode?"19px":"3px";
+  id("stream-label-full").style.fontWeight=streamMode?400:700;
+  id("stream-label-full").style.color=streamMode?"var(--faintest)":"var(--ink)";
+  id("stream-label-stream").style.fontWeight=streamMode?700:400;
+  id("stream-label-stream").style.color=streamMode?"var(--accent)":"var(--faintest)";
+  // Mode desc
+  id("ai-mode-desc").textContent = AI_MODES[aiMode].desc;
+  // Quick prompts
+  const prompts=customQuickPrompts||CONFIG.defaultQuickPrompts;
+  const qbtns=id("quick-btns"); qbtns.innerHTML="";
+  prompts.forEach(item=>{
+    const btn=document.createElement("button");
+    btn.className="quick-btn";
+    btn.textContent=item.label;
+    btn.onclick=()=>{ id("ai-input").value=item.q; sendAI(); };
+    qbtns.appendChild(btn);
+  });
+  id("system-prompt-editor").value=getActiveSystemPrompt();
+  renderConversationHistory();
+}
+
+function toggleStream(){ streamMode=!streamMode; renderAITab(); }
+
+function togglePromptEditor(){
+  const wrap=id("prompt-editor-wrap"), btn=id("prompt-editor-toggle-btn");
+  const hidden=wrap.style.display==="none";
+  wrap.style.display=hidden?"block":"none";
+  btn.textContent=hidden?"▲ HIDE PERSONA":"✏ EDIT COACH PERSONA";
+  if(hidden)id("system-prompt-editor").value=getActiveSystemPrompt();
+}
+
+function saveSystemPrompt(){
+  customSystemPrompt=id("system-prompt-editor").value;
+  save("sos_system_prompt",customSystemPrompt);
+  const toast=id("prompt-saved-toast"); toast.classList.add("visible");
+  setTimeout(()=>toast.classList.remove("visible"),2000);
+}
+
+function resetSystemPrompt(){
+  customSystemPrompt=null; sessionStorage.removeItem("sos_system_prompt");
+  id("system-prompt-editor").value=CONFIG.defaultSystemPrompt;
+  const toast=id("prompt-saved-toast"); toast.textContent="✓ RESET"; toast.classList.add("visible");
+  setTimeout(()=>{toast.classList.remove("visible");toast.textContent="✓ SAVED";},2000);
+}
+
+function clearConversation(){
+  conversationHistory=[];
+  id("convo-history").style.display="none";
+  id("convo-history").innerHTML="";
+  id("ai-response-box").style.display="none";
+  id("ai-response-box").innerHTML="";
+  id("clear-convo-btn").style.display="none";
+  id("ai-input").value="";
+}
+
+function renderConversationHistory(){
+  const hist=id("convo-history");
+  if(!conversationHistory.length){ hist.style.display="none"; return; }
+  hist.style.display="block";
+  hist.innerHTML="";
+  conversationHistory.forEach(turn=>{
+    const div=document.createElement("div");
+    div.className=`convo-turn ${turn.role}`;
+    const label=turn.role==="user"?"YOU":"COACH";
+    div.innerHTML=`<div class="convo-turn-label ${turn.role}">${label}</div><div class="convo-turn-text">${turn.role==="user"?escHtml(turn.content):renderAITextInline(turn.content)}</div>`;
+    hist.appendChild(div);
+  });
+  hist.scrollTop=hist.scrollHeight;
+}
+
+function escHtml(s){ return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+
+function injectPipelineContext(){
+  const myDeals=contacts.filter(c=>c.rep===currentRep.name).slice(0,8);
+  if(!myDeals.length){id("ai-input").value="I have no contacts in my pipeline yet.";return;}
+  const pipelineStr=myDeals.map(c=>`- ${c.name} (${c.title} @ ${c.company}): ${fmtMoney(c.value)}, ${c.stage}, ${c.status}, last touched ${fmtDate(c.lastTouch)}, ${c.touchCount} touches`).join("\n");
+  const existing=id("ai-input").value.trim();
+  id("ai-input").value=(existing?existing+"\n\n":"")+"MY CURRENT PIPELINE:\n"+pipelineStr;
+  const banner=id("ai-context-banner"); banner.style.display="block"; banner.textContent=`📊 Pipeline injected — ${myDeals.length} deals`;
+  setTimeout(()=>banner.style.display="none",3000);
+}
+
+function injectLastActivity(){
+  const recent=[...logs].sort((a,b)=>new Date(b.ts)-new Date(a.ts)).filter(l=>l.rep===currentRep.name).slice(0,5);
+  if(!recent.length){id("ai-input").value="No recent activity logged.";return;}
+  const actStr=recent.map(l=>{const c=contacts.find(x=>x.id===l.contactId);return`- ${fmtDate(l.ts)}: ${l.type.toUpperCase()} with ${c?.name||"unknown"} @ ${c?.company||"?"} — "${l.note}"`;}).join("\n");
+  const existing=id("ai-input").value.trim();
+  id("ai-input").value=(existing?existing+"\n\n":"")+"MY RECENT ACTIVITY:\n"+actStr;
+  const banner=id("ai-context-banner"); banner.style.display="block"; banner.textContent=`📝 Activity injected — ${recent.length} recent logs`;
+  setTimeout(()=>banner.style.display="none",3000);
+}
+
+function copyText(text, btnEl){
+  navigator.clipboard.writeText(text).then(()=>{
+    const toast=id("copy-toast"); toast.classList.add("visible");
+    setTimeout(()=>toast.classList.remove("visible"),1800);
+    if(btnEl){const orig=btnEl.textContent;btnEl.textContent="✓";setTimeout(()=>btnEl.textContent=orig,1500);}
+  });
+}
+
+async function sendAI(){
+  const query=id("ai-input").value.trim(); if(!query||aiLoading)return;
+  aiLoading=true;
+  const sendBtn=id("ai-send-btn"); sendBtn.disabled=true;
+  sendBtn.innerHTML=`<span class="dots"><span class="dot-ani" style="animation-delay:0s"></span><span class="dot-ani" style="animation-delay:.2s"></span><span class="dot-ani" style="animation-delay:.4s"></span></span>`;
+
+  // Add user turn to history
+  conversationHistory.push({role:"user",content:query});
+  id("ai-input").value="";
+  renderConversationHistory();
+  id("clear-convo-btn").style.display="block";
+
+  // Show loading state
+  const box=id("ai-response-box"); box.style.display="block";
+  box.innerHTML=`<div class="ai-response-box"><div class="ai-response-header"><div class="ai-response-icon">⚡</div><div><div class="ai-response-title">COACH SAYS</div><div class="ai-response-sub">${AI_MODES[aiMode].label} · ${currentRep?.name||"you"}</div></div><span class="dots" style="margin-left:auto"><span class="dot-ani" style="animation-delay:0s"></span><span class="dot-ani" style="animation-delay:.2s"></span><span class="dot-ani" style="animation-delay:.4s"></span></span></div><div class="ai-thinking">Reading the situation...</div></div>`;
+
+  try{
+    const basePrompt=buildSystemPrompt(currentRep?.name||"you");
+    const modeAddition=MODE_SYSTEM_ADDITIONS[aiMode]||"";
+    const sysPrompt=basePrompt+modeAddition;
+
+    // Build messages array — full conversation history for multi-turn
+    const messages=conversationHistory.map(t=>({role:t.role,content:t.content}));
+
+    const res=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1800,stream:streamMode,system:sysPrompt,messages})});
+    if(!res.ok){const e=await res.json().catch(()=>({}));const errText=`Error ${res.status}: ${e?.error?.message||"Try again."}`;conversationHistory.pop();renderAIResult(errText);aiLoading=false;sendBtn.disabled=false;sendBtn.textContent="ASK →";return;}
+
+    let fullText="";
+    if(streamMode){
+      const reader=res.body.getReader(), decoder=new TextDecoder();
+      box.innerHTML=`<div class="ai-response-box"><div class="ai-response-header"><div class="ai-response-icon">⚡</div><div><div class="ai-response-title">COACH SAYS</div><div class="ai-response-sub">${AI_MODES[aiMode].label} · ${currentRep?.name||"you"}</div></div></div><div class="ai-rendered" id="ai-stream-div"></div></div>`;
+      const streamDiv=id("ai-stream-div");
+      while(true){
+        const{done,value}=await reader.read(); if(done)break;
+        for(const line of decoder.decode(value,{stream:true}).split("\n")){
+          if(!line.startsWith("data: "))continue;
+          const d=line.slice(6).trim(); if(d==="[DONE]")continue;
+          try{const p=JSON.parse(d);if(p.type==="content_block_delta"&&p.delta?.type==="text_delta"){fullText+=p.delta.text;streamDiv.innerHTML=renderAITextInline(fullText);}}catch{}
+        }
+      }
+    }else{
+      const data=await res.json();
+      fullText=(data.content||[]).filter(b=>b.type==="text").map(b=>b.text).join("")||"No response received.";
+      renderAIResult(fullText);
+    }
+    // Add assistant turn to history
+    if(fullText){ conversationHistory.push({role:"assistant",content:fullText}); renderConversationHistory(); }
+  }catch(e){
+    conversationHistory.pop();
+    renderAIResult("Could not reach AI. Check your connection.");
+  }
+  aiLoading=false; sendBtn.disabled=false; sendBtn.textContent="ASK →";
+}
+
+function renderAIResult(text){
+  const box=id("ai-response-box");
+  box.innerHTML=`<div class="ai-response-box"><div class="ai-response-header"><div class="ai-response-icon">⚡</div><div><div class="ai-response-title">COACH SAYS</div><div class="ai-response-sub">${AI_MODES[aiMode].label} · ${currentRep?.name||"you"}</div></div><button onclick="copyText(${JSON.stringify(text)},this)" style="margin-left:auto;background:none;border:1px solid var(--border);color:var(--muted);padding:3px 10px;cursor:pointer;font-size:9px;font-family:'IBM Plex Mono';font-weight:700">COPY ALL</button></div><div class="ai-rendered">${renderAITextInline(text)}</div></div>`;
+}
+
+function renderAITextInline(text){
+  // Detect MEDDICC audit format
+  if(/^[M|E|D|I|C]\s*(✅|⚠️|❌)/m.test(text)||/MEDDICC/i.test(text.substring(0,80))){
+    return renderMEDDICC(text);
+  }
+  // Detect email format
+  if(text.includes("Subject:")){
+    return renderEmailCard(text);
+  }
+  // Detect multi-email sequence
+  if(/TOUCH\s*[123]/i.test(text)){
+    return renderSequence(text);
+  }
+  // Default rich render
+  return renderRichText(text);
+}
+
+function renderEmailCard(text){
+  const lines=text.split("\n");
+  let subject="",body=[],inBody=false;
+  for(const line of lines){
+    if(line.startsWith("Subject:")){subject=line.replace("Subject:","").trim();inBody=true;continue;}
+    if(inBody)body.push(line);
+  }
+  const bodyText=body.join("\n").trim();
+  const escapedSubject=escHtml(subject);
+  const escapedBody=escHtml(bodyText);
+  return `<div class="email-card">
+    <div class="email-card-header">
+      <span class="email-card-subject">Subject: ${escapedSubject}</span>
+      <button class="email-card-copy" onclick="copyText(${JSON.stringify("Subject: "+subject+"\n\n"+bodyText)},this)">COPY EMAIL</button>
+    </div>
+    <div class="email-card-body">${escapedBody}</div>
+  </div>`;
+}
+
+function renderSequence(text){
+  // Split by TOUCH 1/2/3 markers
+  const parts=text.split(/(?=TOUCH\s*[123])/i).filter(p=>p.trim());
+  if(parts.length<2)return renderRichText(text);
+  return parts.map(part=>{
+    const firstLine=part.split("\n")[0];
+    const rest=part.substring(firstLine.length).trim();
+    if(rest.includes("Subject:")){
+      return `<div style="margin-bottom:12px"><div style="font-size:10px;font-weight:700;letter-spacing:.08em;color:var(--muted);margin-bottom:6px">${escHtml(firstLine)}</div>${renderEmailCard(rest)}</div>`;
+    }
+    return `<div style="margin-bottom:12px"><div style="font-size:10px;font-weight:700;letter-spacing:.08em;color:var(--muted);margin-bottom:6px">${escHtml(firstLine)}</div><div style="padding:10px 14px;background:var(--surface);border:1px solid var(--border);font-size:12px;font-family:'IBM Plex Mono';white-space:pre-wrap">${escHtml(rest)}</div></div>`;
+  }).join("");
+}
+
+function renderMEDDICC(text){
+  const lines=text.split("\n");
+  const meddicColors={M:"#f97316",E:"#3b82f6",D:"#8b5cf6",I:"#ec4899",C:"#10b981"};
+  const statusColors={"✅":"#10b981","⚠️":"#f59e0b","❌":"#ef4444"};
+  let html=`<div class="meddicc-card">`;
+  let inRows=false, extraHtml="";
+  for(const line of lines){
+    const trimmed=line.trim();
+    if(!trimmed)continue;
+    const medMatch=trimmed.match(/^([MEDIC])\s*(✅|⚠️|❌)[:\s]+(.*)/i);
+    if(medMatch){
+      inRows=true;
+      const letter=medMatch[1].toUpperCase(), status=medMatch[2], content=medMatch[3];
+      const bg=meddicColors[letter]||"#666";
+      const statusBg=statusColors[status]||"#666";
+      html+=`<div class="meddicc-row"><div class="meddicc-letter" style="background:${bg}">${letter}</div><div style="flex:1"><div class="meddicc-label" style="color:${bg}">${getMEDDICCLabel(letter)} <span style="font-size:14px">${status}</span></div><div class="meddicc-status">${escHtml(content)}</div></div></div>`;
+    } else if(trimmed.startsWith("BIGGEST GAP:")||trimmed.startsWith("THIS WEEK:")){
+      extraHtml+=`<div class="insight-block" style="margin-top:0;border-top:2px solid var(--border)"><div class="insight-label">${trimmed.split(":")[0]}</div><div class="insight-text">${escHtml(trimmed.split(":").slice(1).join(":").trim())}</div></div>`;
+    } else if(!inRows){
+      extraHtml+=`<p style="padding:10px 14px;font-size:12px;font-family:'IBM Plex Sans';color:var(--ink2)">${escHtml(trimmed)}</p>`;
+    }
+  }
+  html+=`</div>${extraHtml}`;
+  return html;
+}
+
+function getMEDDICCLabel(l){const m={M:"Metrics",E:"Economic Buyer",D:"Decision Criteria",I:"Identify Pain",C:"Champion / Competition"};return m[l]||l;}
+
+function renderRichText(text){
+  const isEmail=text.includes("Subject:");
+  let html="";
+  const lines=text.split("\n");
+  let firstNonEmpty=true;
+  for(let i=0;i<lines.length;i++){
+    const line=lines[i];
+    if(!line.trim()){html+=`<div style="height:6px"></div>`;continue;}
+    // Numbered action with bold label
+    const m1=line.match(/^(\d+)\.\s+\*{1,2}(.+?)\*{1,2}[:\-]\s*(.*)/);
+    if(m1){html+=`<div class="action-card"><span class="action-num">${m1[1]}.</span><div class="action-content"><strong>${escHtml(m1[2])}:</strong> ${escHtml(m1[3])}</div><button class="action-copy-btn" onclick="copyText(${JSON.stringify(m1[2]+": "+m1[3])},this)" title="Copy">⎘</button></div>`;continue;}
+    // Numbered action plain
+    const m2=line.match(/^(\d+)\.\s+(.*)/);
+    if(m2){html+=`<div class="action-card"><span class="action-num">${m2[1]}.</span><div class="action-content">${escHtml(m2[2])}</div><button class="action-copy-btn" onclick="copyText(${JSON.stringify(m2[2])},this)" title="Copy">⎘</button></div>`;continue;}
+    // Insight/risk callouts
+    if(/^(the real risk|gut check|biggest gap|red flag|warning|heads up)[:—]/i.test(line.trim())){
+      const parts=line.split(/[:—]/);
+      html+=`<div class="insight-block"><div class="insight-label">${escHtml(parts[0].trim().toUpperCase())}</div><div class="insight-text">${escHtml(parts.slice(1).join(":").trim())}</div></div>`;continue;
+    }
+    // Bold headers (lines ending in : that are short)
+    if(line.trim().endsWith(":") && line.trim().length<40 && !/[.!?]/.test(line.trim().slice(0,-1))){
+      html+=`<p style="font-weight:700;font-size:12px;color:var(--ink);margin-top:10px;margin-bottom:4px;font-family:'IBM Plex Sans'">${escHtml(line.trim())}</p>`;continue;
+    }
+    // First line = lead / honest read
+    if(firstNonEmpty){firstNonEmpty=false;html+=`<p class="ai-first-line">${escHtml(line)}</p>`;continue;}
+    html+=`<p class="ai-para" style="font-family:'IBM Plex Sans'">${escHtml(line)}</p>`;
+  }
+  return html;
+}
+
+// ─── SETTINGS ─────────────────────────────────────────────────────────────────
+function renderSettings(){
+  id("s-product-name").value=clientConfig.productName||CONFIG.productName;
+  id("s-tagline").value=clientConfig.tagline||CONFIG.tagline;
+  // Populate logo preview
+  renderLogoPreview(load("sos_logo",null));
+
+  // Team members list
+  const repList=id("rep-settings-list"); repList.innerHTML="";
+
+  // Header row
+  const repHeader=document.createElement("div");
+  repHeader.style.cssText="display:grid;grid-template-columns:36px 1fr 1fr 100px auto;gap:8px;align-items:center;padding-bottom:8px;border-bottom:2px solid var(--border);margin-bottom:4px";
+  repHeader.innerHTML=`<div></div><div style="font-size:9px;color:var(--muted);letter-spacing:.1em;font-weight:600">NAME</div><div style="font-size:9px;color:var(--muted);letter-spacing:.1em;font-weight:600">ROLE</div><div style="font-size:9px;color:var(--muted);letter-spacing:.1em;font-weight:600">QUOTA ($)</div><div></div>`;
+  repList.appendChild(repHeader);
+
+  reps.forEach((r,i)=>{
+    const isAdminRep=r.name===CONFIG.adminName;
+    const safeId=r.name.replace(/[^a-zA-Z0-9]/g,"_");
+    const div=document.createElement("div");
+    div.style.cssText="display:grid;grid-template-columns:36px 1fr 1fr 100px auto;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--border2)";
+    div.innerHTML=`
+      <div style="width:32px;height:32px;background:${isAdminRep?"var(--accent)":"var(--dark3)"};display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0" id="rep-avatar-${safeId}">${r.avatar||r.name.substring(0,2).toUpperCase()}</div>
+      <div style="display:flex;align-items:center;gap:6px">
+        <input class="cred-input" id="rep-name-${safeId}" value="${r.name}" placeholder="Name" style="font-weight:600"/>
+        ${isAdminRep?`<span style="font-size:9px;color:var(--accent);font-weight:700;letter-spacing:.06em;white-space:nowrap">★ ADMIN</span>`:""}
+      </div>
+      <input class="cred-input" id="rep-role-${safeId}" value="${r.role}" placeholder="Role"/>
+      <input class="cred-input" id="rep-quota-${safeId}" value="${r.quota}" placeholder="Quota" type="number"/>
+      <div style="display:flex;align-items:center;gap:6px">
+        <button class="cred-save-btn" onclick="saveRepDetails(${i},'${safeId}')">SAVE</button>
+        ${!isAdminRep?`<button onclick="removeRep(${i})" style="background:none;border:1px solid var(--border);color:var(--muted);cursor:pointer;font-size:10px;padding:5px 8px;font-family:'IBM Plex Mono';white-space:nowrap">✕</button>`:""}
+        <span class="cred-saved" id="rep-toast-${safeId}">✓</span>
+      </div>
+    `;
+    repList.appendChild(div);
+  });
+
+  // Credentials section
+  const credList=id("credentials-list"); credList.innerHTML="";
+
+  // Reset code row at top
+  const savedResetCode=load("sos_reset_code",null)||CONFIG.resetCode;
+  const rcDiv=document.createElement("div");
+  rcDiv.style.cssText="display:flex;align-items:center;gap:10px;padding:12px 0 14px;border-bottom:2px solid var(--border);margin-bottom:8px";
+  rcDiv.innerHTML=`
+    <div style="flex:1">
+      <div style="font-size:10px;font-weight:700;letter-spacing:.08em;margin-bottom:5px">ADMIN RESET CODE</div>
+      <div style="font-size:10px;color:var(--muted);font-family:'IBM Plex Sans'">Reps use this code to reset their own password from the login screen.</div>
+    </div>
+    <input class="cred-input" id="cred-reset-code" type="text" value="${savedResetCode}" style="max-width:160px" autocomplete="off"/>
+    <button class="cred-save-btn" onclick="saveResetCode()">SAVE</button>
+    <span class="cred-saved" id="cred-reset-toast">✓ SAVED</span>
+  `;
+  credList.appendChild(rcDiv);
+  const headerDiv=document.createElement("div"); headerDiv.className="cred-header";
+  headerDiv.innerHTML=`<div class="cred-header-label">REP</div><div class="cred-header-label">USERNAME</div><div class="cred-header-label">NEW PASSWORD</div><div></div>`;
+  credList.appendChild(headerDiv);
+
+  // Load any saved credential overrides from session
+  const savedCreds=load("sos_credentials",{});
+
+  reps.forEach(r=>{
+    const isAdminRep=r.name===CONFIG.adminName;
+    // Show active creds: saved takes priority over CONFIG
+    const activeCreds=savedCreds[r.name]||CONFIG.credentials[r.name]||{username:"",password:""};
+    const safeId=r.name.replace(/[^a-zA-Z0-9]/g,"_");
+    const row=document.createElement("div"); row.className="cred-row";
+    row.innerHTML=`
+      <div class="cred-rep-label">
+        <div style="width:26px;height:26px;background:${isAdminRep?"var(--accent)":"var(--dark3)"};display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff;flex-shrink:0">${r.avatar||r.name.substring(0,2).toUpperCase()}</div>
+        <span>${r.name}${isAdminRep?` <span class="cred-admin-star">★</span>`:""}</span>
+      </div>
+      <input class="cred-input" id="cred-u-${safeId}" type="text" value="${activeCreds.username||""}" placeholder="username" autocomplete="off"/>
+      <input class="cred-input" id="cred-p-${safeId}" type="password" placeholder="new password" autocomplete="new-password"/>
+      <div style="display:flex;align-items:center;gap:8px">
+        <button class="cred-save-btn" onclick="saveCred('${r.name}','${safeId}')">SAVE</button>
+        <span class="cred-saved" id="cred-toast-${safeId}">✓ SAVED</span>
+      </div>
+    `;
+    credList.appendChild(row);
+  });
+
+  const qp=customQuickPrompts||CONFIG.defaultQuickPrompts;
+  id("s-quick-prompts").value=qp.map(p=>`${p.label}|${p.q}`).join("\n");
+}
+
+function saveCred(repName, safeId){
+  const uInput=id(`cred-u-${safeId}`), pInput=id(`cred-p-${safeId}`);
+  const newUsername=uInput.value.trim();
+  const newPassword=pInput.value.trim();
+  if(!newUsername){uInput.style.borderColor="var(--red)";setTimeout(()=>uInput.style.borderColor="",1500);return;}
+  // Always load the full saved creds object first
+  const savedCreds=load("sos_credentials",{});
+  // For the existing password: check savedCreds first, then CONFIG — never lose a previously set password
+  const prevSaved=savedCreds[repName];
+  const configCreds=CONFIG.credentials[repName]||{username:"",password:""};
+  const existingPassword = prevSaved ? prevSaved.password : configCreds.password;
+  savedCreds[repName]={
+    username: newUsername,
+    password: newPassword || existingPassword  // only replace if a new password was typed
+  };
+  save("sos_credentials", savedCreds);
+  pInput.value="";
+  const toast=id(`cred-toast-${safeId}`); toast.classList.add("visible");
+  setTimeout(()=>toast.classList.remove("visible"),2000);
+}
+
+function addRep(){
+  const name=id("new-rep-name").value.trim(), role=id("new-rep-role").value.trim(), quota=parseInt(id("new-rep-quota").value)||80000;
+  if(!name)return;
+  const avatar=name.split(" ").map(w=>w[0]).join("").toUpperCase().substring(0,2);
+  reps=[...reps,{name,avatar,role:role||"AE",quota,closed:0}];
+  save("sos_reps",reps); renderSettings(); renderLoginReps();
+  id("new-rep-name").value=""; id("new-rep-role").value=""; id("new-rep-quota").value="";
+}
+
+function removeRep(i){
+  if(reps.length<=1)return;
+  reps=reps.filter((_,idx)=>idx!==i); save("sos_reps",reps); renderSettings(); renderLoginReps();
+}
+
+function saveResetCode(){
+  const code=id("cred-reset-code").value.trim();
+  if(!code)return;
+  save("sos_reset_code",code);
+  const toast=id("cred-reset-toast"); toast.classList.add("visible");
+  setTimeout(()=>toast.classList.remove("visible"),2000);
+}
+
+function saveSettings(){
+  clientConfig={productName:id("s-product-name").value.trim()||CONFIG.productName,tagline:id("s-tagline").value.trim()||CONFIG.tagline};
+  save("sos_client_config",clientConfig); applyBranding();
+  const rawQP=id("s-quick-prompts").value.trim();
+  if(rawQP){
+    customQuickPrompts=rawQP.split("\n").filter(l=>l.trim()).map(l=>{const[label,...rest]=l.split("|");return{label:label.trim(),q:rest.join("|").trim()||label.trim()};});
+    save("sos_quick_prompts",customQuickPrompts);
+  }
+  renderAITab();
+  const toast=id("settings-saved-toast"); toast.classList.add("visible");
+  setTimeout(()=>toast.classList.remove("visible"),2000);
+}
+
+function saveRepDetails(idx, safeId){
+  const newName=id(`rep-name-${safeId}`).value.trim();
+  const newRole=id(`rep-role-${safeId}`).value.trim();
+  const newQuota=parseInt(id(`rep-quota-${safeId}`).value)||80000;
+  if(!newName)return;
+
+  const oldName=reps[idx].name;
+  const newAvatar=newName.split(" ").map(w=>w[0]).join("").toUpperCase().substring(0,2);
+
+  // Update the rep object
+  reps[idx]={...reps[idx],name:newName,role:newRole||reps[idx].role,quota:newQuota,avatar:newAvatar};
+  save("sos_reps",reps);
+
+  // If name changed, migrate contacts, logs, and credentials to new name
+  if(oldName!==newName){
+    contacts=contacts.map(c=>c.rep===oldName?{...c,rep:newName}:c);
+    save("sos_contacts",contacts);
+    logs=logs.map(l=>l.rep===oldName?{...l,rep:newName}:l);
+    save("sos_logs",logs);
+    // Migrate saved credentials key
+    const savedCreds=load("sos_credentials",{});
+    if(savedCreds[oldName]){savedCreds[newName]=savedCreds[oldName];delete savedCreds[oldName];save("sos_credentials",savedCreds);}
+    // If this is the current logged-in rep, update currentRep
+    if(currentRep&&currentRep.name===oldName){currentRep=reps[idx];save("sos_rep",currentRep);id("cur-name").textContent=newName;id("cur-avatar").textContent=newAvatar;}
+  }
+
+  // Re-render settings and login list to reflect new name/avatar
+  renderSettings();
+  renderLoginReps();
+  renderStats();
+
+  // Flash toast by safeId of NEW name
+  const newSafeId=newName.replace(/[^a-zA-Z0-9]/g,"_");
+  const toast=id(`rep-toast-${newSafeId}`);
+  if(toast){toast.classList.add("visible");setTimeout(()=>toast.classList.remove("visible"),2000);}
+}
+
+function saveResetCode(){
+  const code=id("cred-reset-code").value.trim();
+  if(!code)return;
+  save("sos_reset_code",code);
+  const toast=id("cred-reset-toast"); toast.classList.add("visible");
+  setTimeout(()=>toast.classList.remove("visible"),2000);
+}
+
+// ─── RESET PASSWORD ───────────────────────────────────────────────────────────
+function openResetModal(){
+  if(!pendingAuthRep)return;
+  id("reset-repname").textContent=pendingAuthRep.name;
+  id("reset-code").value="";
+  id("reset-newpass").value="";
+  id("reset-confirm").value="";
+  id("reset-error").textContent="";
+  id("reset-modal").style.display="flex";
+  setTimeout(()=>id("reset-code").focus(),200);
+}
+
+function closeResetModal(){
+  id("reset-modal").style.display="none";
+}
+
+function submitReset(){
+  const code=id("reset-code").value;
+  const newPass=id("reset-newpass").value;
+  const confirm=id("reset-confirm").value;
+  const savedResetCode=load("sos_reset_code",null)||CONFIG.resetCode;
+  if(code!==savedResetCode){id("reset-error").textContent="Incorrect reset code.";id("reset-code").value="";id("reset-code").focus();return;}
+  if(!newPass||newPass.length<4){id("reset-error").textContent="Password must be at least 4 characters.";return;}
+  if(newPass!==confirm){id("reset-error").textContent="Passwords don't match.";id("reset-confirm").value="";id("reset-confirm").focus();return;}
+  // Save new password
+  const savedCreds=load("sos_credentials",{});
+  const existing=savedCreds[pendingAuthRep.name]||CONFIG.credentials[pendingAuthRep.name]||{username:"",password:""};
+  savedCreds[pendingAuthRep.name]={username:existing.username,password:newPass};
+  save("sos_credentials",savedCreds);
+  closeResetModal();
+  id("auth-error").textContent="";
+  id("auth-password").value="";
+  // Show a brief success state on the auth screen
+  const hint=document.querySelector("#auth-screen .auth-error")||id("auth-error");
+  id("auth-error").style.color="var(--green)";
+  id("auth-error").textContent="✓ Password updated. Sign in with your new password.";
+  setTimeout(()=>{id("auth-error").style.color="";id("auth-error").textContent="";},4000);
+  id("auth-password").focus();
+}
+
+// ─── BOOT ─────────────────────────────────────────────────────────────────────
+function init() {
+  applyBranding();
+  if (!currentRep) { showLogin(); return; }
+  // Restore admin state from saved session
+  isAdmin = currentRep.name === CONFIG.adminName;
+  if (!isAdmin) repFilter = currentRep.name;
+  showApp();
+}
+init();
+</script>
+</body>
+</html>
